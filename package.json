@@ -16,21 +16,23 @@
     "@quasar/extras": "^1.16.4",
     "quasar": "^2.8.0",
     "vue": "^3.4.18",
-    "vue-router": "^4.0.12"
+    "vue-router": "^4.0.12",
+    "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@quasar/app-vite": "^1.8.0",
+    "@types/node": "^12.20.21",
+    "@types/sortablejs": "^1.15.8",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
     "@typescript-eslint/parser": "^5.10.0",
-    "vite-plugin-checker": "^0.6.4",
-    "vue-tsc": "^1.8.22",
-    "eslint": "^8.11.0",
-    "eslint-plugin-vue": "^9.0.0",
-    "eslint-config-prettier": "^8.1.0",
-    "prettier": "^2.5.1",
-    "@types/node": "^12.20.21",
-    "@quasar/app-vite": "^1.8.0",
     "autoprefixer": "^10.4.2",
-    "typescript": "^4.5.4"
+    "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.4",
+    "vite-plugin-checker": "^0.6.4",
+    "vue-tsc": "^1.8.22"
   },
   "engines": {
     "node": "^20 || ^18 || ^16",
