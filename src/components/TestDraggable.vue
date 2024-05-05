@@ -59,11 +59,14 @@ function removeImage(index: number) {
           </div>
         </template>
       </draggable>
-      <div v-if="imageList.length > 0" class="add-more-message at-bottom">
-        Drag more images here to add them to the list.
+      <div v-if="imageList.length === 0" class="empty-message at-center">
+        Drag images here.
       </div>
-      <div v-else class="empty-message at-center">
-        Drag images here
+      <div v-else-if="imageList.length === 1" class="add-more-message at-bottom">
+        Drag another image here.
+      </div>
+      <div v-else class="add-more-message at-bottom">
+        Drag to reorder images or to add more images here.
       </div>
     </div>
   </div>
