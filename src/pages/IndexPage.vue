@@ -2,7 +2,7 @@
 // import { ref } from 'vue';
 // import { Todo, Meta } from 'components/models';
 // import ExampleComponent from 'components/ExampleComponent.vue';
-import TestDraggable from 'components/TestDraggable.vue';
+import ImageUploader from 'components/ImageUploader.vue';
 
 // defineOptions({
 //   name: 'IndexPage'
@@ -39,6 +39,6 @@ import TestDraggable from 'components/TestDraggable.vue';
 <template>
   <q-page class="row items-center justify-evenly">
 <!--    <example-component title="Example component" active :todos="todos" :meta="meta"></example-component>-->
-    <test-draggable/>
+    <image-uploader/>
   </q-page>
 </template>
