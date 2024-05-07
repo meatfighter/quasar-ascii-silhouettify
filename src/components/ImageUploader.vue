@@ -74,7 +74,7 @@ function removeImage(index: number) {
 <style scoped>
 .vue-container {
   height: 90vh; /* or any appropriate value */
-  width: 60vw;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
