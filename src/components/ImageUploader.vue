@@ -73,32 +73,33 @@ function removeImage(index: number) {
 
 <style scoped>
 .vue-container {
-  height: 90vh; /* or any appropriate value */
-  width: 100%;
+  height: 100vh; /* Full height of its container */
+  width: 100%; /* Optional: full width */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;  /* Ensures that overflow is handled by the .drop-area */
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  overflow: hidden; /* Hide overflow */
 }
 
 .drop-area {
-  flex: 1;  /* Allows the drop area to fill the container and handle its own overflow */
+  width: 100%; /* Take full width */
+  max-height: 100%; /* Do not exceed the parent's height */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;  /* Aligns items to the start of the flex container */
-  width: 100%;  /* Takes the full width of the container */
-  max-height: 100%;  /* Ensures the drop area does not exceed the container height */
-  overflow-y: auto;  /* Enables vertical scrolling */
-  margin: 20px;  /* Adjust or remove based on your design */
-  padding: 10px;  /* Adds padding inside the drop area */
-  box-sizing: border-box;  /* Includes padding and border in the element's total width and height */
-  border: none;
+  justify-content: center; /* Center vertically within the area */
+  align-items: center; /* Center horizontally */
+  overflow-y: auto; /* Enable vertical scrolling when needed */
+  box-sizing: border-box;
 }
 
 .empty-drop-area {
   border: 2px dashed #ccc;
+  width: 100%; /* Full width */
+  flex-grow: 1; /* Grow to fill the space for flex container */
+  display: flex;
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
 }
 
 .thumbnail {
