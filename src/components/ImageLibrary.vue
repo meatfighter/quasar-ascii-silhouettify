@@ -42,64 +42,50 @@ function removeImage(index: number) {
 </script>
 
 <template>
-  <div class="vue-container">
-    <div
-        @drop.prevent="handleDrop"
-        @dragover.prevent
-        @dragenter.prevent
-        class="drop-area"
-        :class="{ 'empty-drop-area': imageList.length === 0 }"
-    >
-      <draggable v-model="imageList" @end="onEnd">
-        <template #item="{element, index}">
-          <div :key="index" class="thumbnail">
-            <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
-            <button @click="removeImage(index)" class="remove-btn">&times;</button>
-          </div>
-        </template>
-      </draggable>
-      <div v-if="imageList.length === 0" class="empty-message at-center">
-        Drag images here.
+  <q-scroll-area class="full-height-scroll-area">
+      <div
+          @drop.prevent="handleDrop"
+          @dragover.prevent
+          @dragenter.prevent
+          class="full-height row justify-center items-center"
+      >
+        <draggable v-model="imageList" @end="onEnd">
+          <template #item="{element, index}">
+            <div :key="index" class="thumbnail">
+              <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
+              <button @click="removeImage(index)" class="remove-btn">&times;</button>
+            </div>
+          </template>
+        </draggable>
+        <div v-if="imageList.length === 0" class="test">
+          Drag images here.
+        </div>
+        <div v-else-if="imageList.length === 1">
+          Drag another image here.
+        </div>
+        <div v-else>
+          Drag to reorder images or to add more images here.
+        </div>
       </div>
-      <div v-else-if="imageList.length === 1" class="add-more-message at-bottom">
-        Drag another image here.
-      </div>
-      <div v-else class="add-more-message at-bottom">
-        Drag to reorder images or to add more images here.
-      </div>
-    </div>
-  </div>
+  </q-scroll-area>
 </template>
 
 <style scoped>
-.vue-container {
-  height: 100vh; /* Full height of its container */
-  width: 100%; /* Optional: full width */
+.full-height-scroll-area {
+  background: #EE0000;
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* Center content vertically */
-  align-items: center; /* Center content horizontally */
-  overflow: hidden; /* Hide overflow */
+  justify-content: center;  /* Horizontal centering inside the component */
+  align-items: center;  /* Vertical centering inside the component */
 }
 
-.drop-area {
-  width: 100%; /* Take full width */
-  max-height: 100%; /* Do not exceed the parent's height */
+.test {
+  width: 200px;  /* Or any specific size */
+  height: 100px;  /* Or any specific size */
+  background: #00EE00;  /* Just for visibility */
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* Center vertically within the area */
-  align-items: center; /* Center horizontally */
-  overflow-y: auto; /* Enable vertical scrolling when needed */
-  box-sizing: border-box;
-}
-
-.empty-drop-area {
-  border: 2px dashed #ccc;
-  width: 100%; /* Full width */
-  flex-grow: 1; /* Grow to fill the space for flex container */
-  display: flex;
-  align-items: center; /* Center vertically */
-  justify-content: center; /* Center horizontally */
+  justify-content: center;  /* Horizontal centering inside the component */
+  align-items: center;  /* Vertical centering inside the component */
 }
 
 .thumbnail {
@@ -138,22 +124,5 @@ function removeImage(index: number) {
 .thumbnail:active {
   cursor: grabbing;
   opacity: 0.5;
-}
-
-.empty-message, .add-more-message {
-  text-align: center;
-  color: #aaa;
-  font-size: 16px;
-  width: 100%;
-}
-
-.at-center {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.at-bottom {
-  margin-top: auto;
 }
 </style>

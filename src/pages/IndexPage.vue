@@ -2,7 +2,7 @@
 // import { ref } from 'vue';
 // import { Todo, Meta } from 'components/models';
 // import ExampleComponent from 'components/ExampleComponent.vue';
-import ImageUploader from 'components/ImageUploader.vue';
+import ImageUploader from 'components/ImageLibrary.vue';
 
 // defineOptions({
 //   name: 'IndexPage'
