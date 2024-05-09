@@ -1,91 +1,56 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import draggable from 'vuedraggable';
 import { MoveEvent } from 'sortablejs';
+import { useImageLibraryStore } from 'stores/imageLibraryStore';
+import { storeToRefs } from 'pinia';
 
-interface ImageItem {
-  src: string;
-}
-
-const imageList = ref<ImageItem[]>([]);
+const imageLibraryStore = useImageLibraryStore();
+const { imageList } = storeToRefs(imageLibraryStore);
+const { removeImage } = imageLibraryStore;
 
 function onEnd(event: MoveEvent) {
   console.log('Final list:', imageList.value, event);
 }
-
-function handleDrop(event: DragEvent) {
-  event.preventDefault();
-
-  if (event.dataTransfer) {
-    const files = event.dataTransfer.files;
-    if (!files.length) {
-      return;
-    }
-
-    Array.from(files).forEach(file => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-          if (e.target?.result) {
-            imageList.value.push({ src: e.target.result.toString() });
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-}
-
-function removeImage(index: number) {
-  imageList.value.splice(index, 1);
-}
 </script>
 
 <template>
-  <q-scroll-area class="full-height-scroll-area">
-      <div
-          @drop.prevent="handleDrop"
-          @dragover.prevent
-          @dragenter.prevent
-          class="full-height row justify-center items-center"
-      >
-        <draggable v-model="imageList" @end="onEnd">
-          <template #item="{element, index}">
-            <div :key="index" class="thumbnail">
-              <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
-              <button @click="removeImage(index)" class="remove-btn">&times;</button>
-            </div>
-          </template>
-        </draggable>
-        <div v-if="imageList.length === 0" class="test">
-          Drag images here.
-        </div>
-        <div v-else-if="imageList.length === 1">
-          Drag another image here.
-        </div>
-        <div v-else>
-          Drag to reorder images or to add more images here.
-        </div>
+    <q-scroll-area class="full-height-scroll-area">
+      <draggable v-model="imageList" @end="onEnd">
+        <template #item="{element, index}">
+          <div :key="index" class="thumbnail">
+            <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
+            <button @click="removeImage(index)" class="remove-btn">&times;</button>
+          </div>
+        </template>
+      </draggable>
+      <div v-if="imageList.length === 0" class="empty-box">
+        Drag images here.
       </div>
-  </q-scroll-area>
+      <div v-else-if="imageList.length === 1">
+        Drag another image here.
+      </div>
+      <div v-else>
+        Drag to reorder images or to add more images here.
+      </div>
+    </q-scroll-area>
 </template>
 
 <style scoped>
 .full-height-scroll-area {
-  background: #EE0000;
+  width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;  /* Horizontal centering inside the component */
-  align-items: center;  /* Vertical centering inside the component */
+  justify-content: center;
+  align-items: center;
 }
 
-.test {
-  width: 200px;  /* Or any specific size */
-  height: 100px;  /* Or any specific size */
-  background: #00EE00;  /* Just for visibility */
+.empty-box {
+  width: 100%;
+  height: 100vh;
   display: flex;
-  justify-content: center;  /* Horizontal centering inside the component */
-  align-items: center;  /* Vertical centering inside the component */
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed;
 }
 
 .thumbnail {
