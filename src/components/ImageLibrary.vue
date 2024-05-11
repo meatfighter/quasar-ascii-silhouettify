@@ -8,16 +8,21 @@ const imageLibraryStore = useImageLibraryStore();
 const { imageList } = storeToRefs(imageLibraryStore);
 const { removeImage } = imageLibraryStore;
 
-function onEnd(event: MoveEvent) {
-  console.log('Final list:', imageList.value, event);
+function onDragStart(event: MoveEvent) {
+  console.log('drag start: ', imageList.value, event);
+}
+
+function onDragEnd(event: MoveEvent) {
+  console.log('drag end:', imageList.value, event);
 }
 </script>
 
 <template>
     <q-scroll-area class="full-height-scroll-area">
-      <draggable v-if="imageList.length !== 0" v-model="imageList" @end="onEnd" class="center-horizontally">
+      <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
+          item-key="id" class="center-horizontally">
         <template #item="{element, index}">
-          <div :key="index" class="thumbnail">
+          <div class="thumbnail">
             <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
             <button @click="removeImage(index)" class="remove-btn">&times;</button>
           </div>
@@ -82,6 +87,11 @@ function onEnd(event: MoveEvent) {
   position: relative;
 }
 
+.thumbnail:active {
+  cursor: grabbing;
+  opacity: 0.5;
+}
+
 .remove-btn {
   position: absolute;
   top: 0;
@@ -103,10 +113,5 @@ function onEnd(event: MoveEvent) {
 
 .remove-btn:hover {
   opacity: 1;
-}
-
-.thumbnail:active {
-  cursor: grabbing;
-  opacity: 0.5;
 }
 </style>
