@@ -5,6 +5,7 @@ const fontSizeModel = ref(12);
 const lineHeightModel = ref(1.2);
 const scaleModel = ref(1);
 const colorModel = ref(true);
+const threadsModel = ref(12);
 </script>
 
 <template>
@@ -12,7 +13,12 @@ const colorModel = ref(true);
     <q-input label="Font Size" v-model.number="fontSizeModel" type="number" filled></q-input>
     <q-input label="Line Height" v-model.number="lineHeightModel" type="number" filled></q-input>
     <q-input label="Scale" v-model.number="scaleModel" type="number" filled></q-input>
-    <q-checkbox label="Color" v-model="colorModel" filled></q-checkbox>
+    <q-input label="Threads" v-model.number="threadsModel" type="number" filled></q-input>
+    <q-field label="Color" filled stack-label>
+      <template v-slot:control>
+        <q-toggle v-model="colorModel"></q-toggle>
+      </template>
+    </q-field>
   </q-scroll-area>
 </template>
 
