@@ -21,7 +21,7 @@ function onDragEnd(event: MoveEvent) {
     <q-scroll-area class="full-height-scroll-area">
       <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
           item-key="id" class="center-horizontally">
-        <template #item="{element, index}">
+        <template #item="{ element, index }">
           <div class="thumbnail">
             <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
             <button @click="removeImage(index)" class="remove-btn">&times;</button>

@@ -8,7 +8,7 @@ const splitterModel = ref(100);
 </script>
 
 <template>
-  <q-splitter v-model="splitterModel" class="col" unit="px">
+  <q-splitter v-model="splitterModel" class="col" unit="px" separator-style="width: 0;">
     <template v-slot:before>
       <div ref="optionsAdjustor">
         <options-adjustor/>
