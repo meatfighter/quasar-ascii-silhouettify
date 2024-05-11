@@ -10,7 +10,7 @@
 
 
 const { configure } = require('quasar/wrappers');
-
+const { resolve } = require('path');
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -67,7 +67,22 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.build = {
+          ...viteConf.build,
+          rollupOptions: {
+            input: {
+              main: resolve(__dirname, 'index.html'),
+              worker: resolve(__dirname, 'src/worker.ts')
+            },
+            output: {
+              entryFileNames: (chunk) => {
+                return chunk.name === 'worker' ? 'assets/worker.js' : 'assets/[name].[hash].js';
+              },
+            }
+          }
+        };
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
