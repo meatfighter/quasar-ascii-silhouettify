@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "chroma-js": "^2.4.2",
     "pinia": "^2.1.7",
     "quasar": "^2.8.0",
     "vue": "^3.4.18",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@quasar/app-vite": "^1.8.0",
+    "@types/chroma-js": "^2.4.4",
     "@types/node": "^12.20.21",
     "@types/sortablejs": "^1.15.8",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
