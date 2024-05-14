@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import ImageLibrary from 'components/ImageLibrary.vue';
 import OptionsAdjustor from 'components/OptionsAdjustor.vue';
 
-const splitterModel = ref(100);
+const splitterModel = ref(120);
 </script>
 
 <template>

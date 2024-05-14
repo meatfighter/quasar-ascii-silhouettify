@@ -14,7 +14,7 @@ export class ImageDataResponse {
 }
 
 // This function takes a data URL and a callback function that will receive the RGBA data array.
-function extractRGBAFromDataURL(dataURL: string, callback: (rgba: Uint8ClampedArray, width: number, height: number) => void): void {
+export function extractRGBAFromDataURL(dataURL: string, callback: (rgba: Uint8ClampedArray, width: number, height: number) => void): void {
     // Create an image element
     const img = new Image();
 
@@ -25,7 +25,11 @@ function extractRGBAFromDataURL(dataURL: string, callback: (rgba: Uint8ClampedAr
     img.onload = () => {
         // Create a canvas element
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d'); // TODO REVIEW
+        if (ctx === null) {
+            return;
+        }
+
 
         // Set canvas dimensions to image dimensions
         canvas.width = img.width;

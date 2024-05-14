@@ -7,7 +7,7 @@ import ImagesAndOptions from 'components/ImagesAndOptions.vue';
 const imageLibraryStore = useImageLibraryStore();
 const { addImage } = imageLibraryStore;
 
-const splitterModel = ref(400);
+const splitterModel = ref(420);
 
 function handleDrop(event: DragEvent) {
   event.preventDefault();
