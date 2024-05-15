@@ -3,10 +3,12 @@ import { ref, watch } from 'vue';
 import { clamp } from 'src/utils/numbers';
 
 const formatOptions = [ 'text', 'HTML', 'Neofetch' ];
-const formatModel = ref('text');
+const DEFAULT_FORMAT = formatOptions[0];
+const formatModel = ref(DEFAULT_FORMAT);
 
 const paletteOptions = [ '8', '16', '240', '256' ];
-const paletteModel = ref('240');
+const DEFAULT_PALETTE = paletteOptions[2];
+const paletteModel = ref(DEFAULT_PALETTE);
 
 const DEFAULT_COLORS = 255;
 const MIN_COLORS = 1;
@@ -54,7 +56,20 @@ const threadsModel = ref(DEFAULT_THREADS);
 watch(threadsModel, () => threadsModel.value = clamp(threadsModel.value, MIN_THREADS, MAX_THREADS, DEFAULT_THREADS,
     true));
 
-const monochromeModel = ref(false);
+const DEFAULT_MONOCHROME = false;
+const monochromeModel = ref(DEFAULT_MONOCHROME);
+
+function defaultsClicked() {
+  formatModel.value = DEFAULT_FORMAT;
+  paletteModel.value = DEFAULT_PALETTE;
+  colorsModel.value = DEFAULT_COLORS;
+  fontSizeModel.value = DEFAULT_FONT_SIZE;
+  lineHeightModel.value = DEFAULT_LINE_HEIGHT;
+  scaleModel.value = DEFAULT_SCALE;
+  darknessModel.value = DEFAULT_DARKNESS;
+  threadsModel.value = DEFAULT_THREADS;
+  monochromeModel.value = DEFAULT_MONOCHROME;
+}
 </script>
 
 <template>
@@ -79,7 +94,7 @@ const monochromeModel = ref(false);
       </template>
     </q-field>
     <div class="q-ma-md row justify-center">
-      <q-btn label="Defaults" rounded no-caps color="primary"/>
+      <q-btn label="Defaults" rounded no-caps color="primary" @click="defaultsClicked()"/>
     </div>
   </q-scroll-area>
 </template>
