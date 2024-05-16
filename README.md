@@ -1,4 +1,4 @@
-# quasar-ascii-silhouette (quasar-ascii-silhouette)
+# quasar-ascii-silhouettify (quasar-ascii-silhouettify)
 
 Online ascii silhouette generator.
 

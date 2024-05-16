@@ -1,11 +1,12 @@
 {
-  "name": "quasar-ascii-silhouette",
+  "name": "quasar-ascii-silhouettify",
   "version": "0.0.1",
   "description": "Online ascii silhouette generator.",
-  "productName": "quasar-ascii-silhouette",
+  "productName": "quasar-ascii-silhouettify",
   "author": "meatfighter <o__1@hotmail.com>",
   "private": true,
   "scripts": {
+    "clean": "rimraf ./dist ./bin",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
