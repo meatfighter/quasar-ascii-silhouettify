@@ -73,36 +73,36 @@ function defaultsClicked() {
 </script>
 
 <template>
-  <q-scroll-area class="full-height-scroll-area">
-    <q-select v-model="formatModel" :options="formatOptions" label="Format" filled/>
-    <q-select v-model="paletteModel" :options="paletteOptions" label="Palette" filled/>
-    <q-input label="Colors" v-model.number="colorsModel" type="number" filled :min="MIN_COLORS" :max="MAX_COLORS"
-             :step="COLORS_STEP"/>
-    <q-input label="Font Size" v-model.number="fontSizeModel" type="number" filled :min="MIN_FONT_SIZE"
-             :max="MAX_FONT_SIZE" :step="FONT_SIZE_STEP"/>
-    <q-input label="Line Height" v-model.number="lineHeightModel" type="number" filled :min="MIN_LINE_HEIGHT"
-             :max="MAX_LINE_HEIGHT" :step="LINE_HEIGHT_STEP"/>
-    <q-input label="Scale" v-model.number="scaleModel" type="number" filled :min="MIN_SCALE" :max="MAX_SCALE"
-             :step="SCALE_STEP"/>
-    <q-input label="Darkness" v-model.number="darknessModel" type="number" filled :min="MIN_DARKNESS"
-             :max="MAX_DARKNESS" :step="DARKNESS_STEP"/>
-    <q-input label="Threads" v-model.number="threadsModel" type="number" filled :min="MIN_THREADS" :max="MAX_THREADS"
-             :step="THREADS_STEP"/>
-    <q-field label="Monochrome" filled stack-label>
-      <template v-slot:control>
-        <q-toggle v-model="monochromeModel"></q-toggle>
-      </template>
-    </q-field>
-    <div class="q-ma-md row justify-center">
-      <q-btn label="Defaults" rounded no-caps color="primary" @click="defaultsClicked()"/>
-    </div>
-  </q-scroll-area>
+    <q-scroll-area class="full-height-scroll-area">
+      <q-select v-model="formatModel" :options="formatOptions" label="Format" filled/>
+      <q-select v-model="paletteModel" :options="paletteOptions" label="Palette" filled/>
+      <q-input label="Colors" v-model.number="colorsModel" type="number" filled :min="MIN_COLORS" :max="MAX_COLORS"
+               :step="COLORS_STEP"/>
+      <q-input label="Font Size" v-model.number="fontSizeModel" type="number" filled :min="MIN_FONT_SIZE"
+               :max="MAX_FONT_SIZE" :step="FONT_SIZE_STEP"/>
+      <q-input label="Line Height" v-model.number="lineHeightModel" type="number" filled :min="MIN_LINE_HEIGHT"
+               :max="MAX_LINE_HEIGHT" :step="LINE_HEIGHT_STEP"/>
+      <q-input label="Scale" v-model.number="scaleModel" type="number" filled :min="MIN_SCALE" :max="MAX_SCALE"
+               :step="SCALE_STEP"/>
+      <q-input label="Darkness" v-model.number="darknessModel" type="number" filled :min="MIN_DARKNESS"
+               :max="MAX_DARKNESS" :step="DARKNESS_STEP"/>
+      <q-input label="Threads" v-model.number="threadsModel" type="number" filled :min="MIN_THREADS" :max="MAX_THREADS"
+               :step="THREADS_STEP"/>
+      <q-field label="Monochrome" filled stack-label>
+        <template v-slot:control>
+          <q-toggle v-model="monochromeModel"></q-toggle>
+        </template>
+      </q-field>
+      <div class="q-ma-md row justify-center">
+        <q-btn label="Defaults" rounded no-caps color="primary" @click="defaultsClicked()"/>
+      </div>
+    </q-scroll-area>
 </template>
 
 <style scoped>
 .full-height-scroll-area {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: center;

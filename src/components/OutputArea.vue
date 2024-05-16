@@ -4,7 +4,7 @@
 
 <template>
   <q-scroll-area class="full-height-scroll-area">
-
+    <p>Hello, World!</p>
   </q-scroll-area>
 </template>
 
