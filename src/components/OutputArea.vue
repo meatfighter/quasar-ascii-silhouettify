@@ -4,19 +4,17 @@
 
 <template>
   <q-scroll-area class="full-height-scroll-area">
-    <p>Hello, World!</p>
+    <div v-for="n in 50" :key="n">
+      <p>Hello, World!</p>
+    </div>
   </q-scroll-area>
 </template>
 
 <style scoped>
 .full-height-scroll-area {
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  position: relative;
+  height: 100%;
+  //background: #0C0C0C;
+  background: #21BA45;
   overflow: hidden;
-  background: #0C0C0C;
 }
 </style>
