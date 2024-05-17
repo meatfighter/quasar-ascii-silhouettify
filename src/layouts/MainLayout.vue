@@ -36,12 +36,7 @@ function handleDrop(event: DragEvent) {
         <q-page class="row items-stretch">
           <q-splitter v-model="splitterModel" separator-style="width: 0;" unit="px" style="width: 100%;">
             <template v-slot:before>
-<!--               <div style="background: red; height: 100%; overflow: hidden;">-->
-<!--                <p>Hello World!</p>-->
-<!--                <p>Hello World 2!</p>-->
-<!--               </div>-->
-
--              <images-and-options/>
+              <images-and-options/>
             </template>
             <template v-slot:after>
               <output-area/>

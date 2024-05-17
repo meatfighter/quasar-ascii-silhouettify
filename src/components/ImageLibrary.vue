@@ -18,36 +18,32 @@ function onDragEnd(event: MoveEvent) {
 </script>
 
 <template>
-    <q-scroll-area class="full-height-scroll-area">
-      <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
-          item-key="id" class="center-horizontally">
-        <template #item="{ element, index }">
-          <div class="thumbnail">
-            <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
-            <button @click="removeImage(index)" class="remove-btn">&times;</button>
-          </div>
-        </template>
-      </draggable>
-      <div v-if="imageList.length === 0" class="empty-box">
-        Drag images here.
-      </div>
-      <div v-else-if="imageList.length === 1" class="message-bottom">
-        Drag another image here.
-      </div>
-      <div v-else class="message-bottom">
-        Drag to reorder images or to add more images here.
-      </div>
-    </q-scroll-area>
+  <div v-if="imageList.length === 0" class="empty-box">
+    Drag images here.
+  </div>
+  <q-scroll-area v-else class="full-height-scroll-area">
+    <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
+        item-key="id" class="center-horizontally">
+      <template #item="{ element, index }">
+        <div class="thumbnail">
+          <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
+          <button @click="removeImage(index)" class="remove-btn">&times;</button>
+        </div>
+      </template>
+    </draggable>
+    <div v-if="imageList.length === 1" class="message-bottom">
+      Drag another image here.
+    </div>
+    <div v-else class="message-bottom">
+      Drag to reorder images or to add more images here.
+    </div>
+  </q-scroll-area>
 </template>
 
 <style scoped>
 .full-height-scroll-area {
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  position: relative;
   overflow: hidden;
   background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
 }
@@ -59,8 +55,8 @@ function onDragEnd(event: MoveEvent) {
   justify-content: center;
   align-items: center;
   border: 2px dashed;
-  position: relative;
   overflow: hidden;
+  background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
 }
 
 .message-bottom {

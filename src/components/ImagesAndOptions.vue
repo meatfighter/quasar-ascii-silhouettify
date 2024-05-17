@@ -8,11 +8,9 @@ const splitterModel = ref(120);
 </script>
 
 <template>
-  <q-splitter v-model="splitterModel" class="col" unit="px" separator-style="width: 0;" style="height: 100%;">
+  <q-splitter v-model="splitterModel" unit="px" separator-style="width: 0;" style="height: 100%; overflow: hidden;">
     <template v-slot:before>
-      <div ref="optionsAdjustor">
-        <options-adjustor/>
-      </div>
+      <options-adjustor/>
     </template>
     <template v-slot:after>
       <image-library/>
@@ -21,5 +19,4 @@ const splitterModel = ref(120);
 </template>
 
 <style scoped>
-
 </style>
