@@ -3,6 +3,11 @@ import draggable from 'vuedraggable';
 import { MoveEvent } from 'sortablejs';
 import { useImageLibraryStore } from 'stores/imageLibraryStore';
 import { storeToRefs } from 'pinia';
+import ImageLibraryToolbar from 'components/ImageLibraryToolbar.vue';
+import { ImageItem } from 'src/types/imageItem';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
 
 const imageLibraryStore = useImageLibraryStore();
 const { imageList } = storeToRefs(imageLibraryStore);
@@ -15,47 +20,68 @@ function onDragStart(event: MoveEvent) {
 function onDragEnd(event: MoveEvent) {
   console.log('drag end:', imageList.value, event);
 }
+
+function onLoadEnd(element: ImageItem, index: number) {
+  console.log('load end:', element, index);
+}
+
+function onLoadError(element: ImageItem, index: number) {
+  console.log('load error:', element, index);
+  removeImage(index);
+  showErrorNotification(`Error loading image ${element.name}`);
+}
+
+function showErrorNotification(message: string) {
+  $q.notify({
+    type: 'negative',
+    message: message,
+    position: 'bottom',
+  });
+}
 </script>
 
 <template>
-  <div v-if="imageList.length === 0" class="empty-box">
-    Drag images here.
+  <div class="full-height-scroll-area column">
+    <image-library-toolbar/>
+    <div v-if="imageList.length === 0" class="col empty-box">
+      Drag images here.
+    </div>
+    <q-scroll-area v-else class="col">
+      <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
+          item-key="id" class="center-horizontally">
+        <template #item="{ element, index }">
+          <div class="thumbnail">
+            <img
+              :src="element.src"
+              @load="onLoadEnd(element, index)"
+              @error="onLoadError(element, index)"
+              alt="Thumbnail"
+              style="width: 100px; height: auto;">
+            <button @click="removeImage(index)" class="remove-btn">&times;</button>
+          </div>
+        </template>
+      </draggable>
+      <div v-if="imageList.length === 1" class="message-bottom">
+        Drag another image here.
+      </div>
+      <div v-else class="message-bottom">
+        Drag to reorder images or to add more images here.
+      </div>
+    </q-scroll-area>
   </div>
-  <q-scroll-area v-else class="full-height-scroll-area">
-    <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
-        item-key="id" class="center-horizontally">
-      <template #item="{ element, index }">
-        <div class="thumbnail">
-          <img :src="element.src" alt="Thumbnail" style="width: 100px; height: auto;">
-          <button @click="removeImage(index)" class="remove-btn">&times;</button>
-        </div>
-      </template>
-    </draggable>
-    <div v-if="imageList.length === 1" class="message-bottom">
-      Drag another image here.
-    </div>
-    <div v-else class="message-bottom">
-      Drag to reorder images or to add more images here.
-    </div>
-  </q-scroll-area>
 </template>
 
 <style scoped>
 .full-height-scroll-area {
-  width: 100%;
   height: 100%;
-  overflow: hidden;
   background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
 }
 
 .empty-box {
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   border: 2px dashed;
-  overflow: hidden;
   background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
 }
 

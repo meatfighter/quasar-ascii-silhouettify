@@ -10,17 +10,39 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
         imageList.value.splice(index, 1);
     }
 
-    function addImage(file: File) {
-        if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e: ProgressEvent<FileReader>) => {
-                if (e.target?.result) {
-                  imageList.value.push({ src: e.target.result.toString() });
-                }
-            };
-            reader.readAsDataURL(file);
+    function addImageFromFile(file: File | null | undefined) {
+        if (!file) {
+            return;
         }
+
+        console.log('file load start:', file);
+
+        // TODO IT IS POSSIBLE TO RECORD LOADING (BOOLEAN) AND ERROR (BOOLEAN) IN IMAGElIST ELEMENTS
+
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+            if (e.target?.result) {
+                imageList.value.push({
+                    src: e.target.result.toString(),
+                    name: file.name,
+                });
+            }
+        };
+        reader.readAsDataURL(file);
     }
 
-    return { imageList, removeImage, addImage };
+    function addImageFromUrl(url: string | null | undefined) {
+        if (!url) {
+            return;
+        }
+
+        console.log('url load start:', url);
+
+        imageList.value.push({
+            src: url,
+            name: url,
+        });
+    }
+
+    return { imageList, removeImage, addImageFromFile, addImageFromUrl };
 });

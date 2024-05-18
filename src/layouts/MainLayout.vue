@@ -3,9 +3,10 @@ import { ref } from 'vue';
 import { useImageLibraryStore } from 'stores/imageLibraryStore';
 import OutputArea from 'components/OutputArea.vue';
 import ImagesAndOptions from 'components/ImagesAndOptions.vue';
+import MainHeader from 'components/MainHeader.vue';
 
 const imageLibraryStore = useImageLibraryStore();
-const { addImage } = imageLibraryStore;
+const { addImageFromFile } = imageLibraryStore;
 
 const splitterModel = ref(420);
 
@@ -17,7 +18,7 @@ function handleDrop(event: DragEvent) {
     if (!files.length) {
       return;
     }
-    Array.from(files).forEach(file => addImage(file));
+    Array.from(files).forEach(file => addImageFromFile(file));
   }
 }
 </script>
@@ -26,12 +27,7 @@ function handleDrop(event: DragEvent) {
   <q-layout view="hHh lpr fFf">
 
     <div @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
-      <q-header style="background: #1F1F1F; color: white;">
-        <q-toolbar>
-          <q-img src="logo.svg" spinner-color="white" style="width: 32px; height: 32px;"/>
-          <q-toolbar-title>ASCII Silhouettify</q-toolbar-title>
-        </q-toolbar>
-      </q-header>
+      <main-header/>
 
       <q-page-container>
         <q-page class="row items-stretch">
