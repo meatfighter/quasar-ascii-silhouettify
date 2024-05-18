@@ -27,7 +27,7 @@ function onLoadEnd(element: ImageItem, index: number) {
 
 function onLoadError(element: ImageItem, index: number) {
   console.log('load error:', element, index);
-  removeImage(index);
+  // removeImage(index);
   showErrorNotification(`Error loading image ${element.name}`);
 }
 
@@ -36,8 +36,11 @@ function showErrorNotification(message: string) {
     type: 'negative',
     message: message,
     position: 'bottom',
+    closeBtn: true,
   });
 }
+
+// TODO ADDING / REMOVING / REORDING THE LIST TRIGGERS RELOADS :(
 </script>
 
 <template>
