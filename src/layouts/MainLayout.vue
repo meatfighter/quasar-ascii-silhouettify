@@ -26,9 +26,10 @@ function handleDrop(event: DragEvent) {
   <q-layout view="hHh lpr fFf">
 
     <div @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
-      <q-header :class="$q.dark.isActive ? 'bg-secondary' : 'bg-black'">
+      <q-header style="background: #1F1F1F; color: white;">
         <q-toolbar>
-          <q-toolbar-title>Header</q-toolbar-title>
+          <q-img src="logo.svg" spinner-color="white" style="width: 32px; height: 32px;"/>
+          <q-toolbar-title>ASCII Silhouettify</q-toolbar-title>
         </q-toolbar>
       </q-header>
 
@@ -45,7 +46,7 @@ function handleDrop(event: DragEvent) {
         </q-page>
       </q-page-container>
 
-      <q-footer class="bg-grey-8 text-white">
+      <q-footer style="background: #1F1F1F; color: white;">
         <q-toolbar>
           <q-toolbar-title>
             <q-avatar>
