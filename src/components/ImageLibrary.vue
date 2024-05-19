@@ -27,18 +27,15 @@ function onLoadEnd(element: ImageItem, index: number) {
 
 function onLoadError(element: ImageItem, index: number) {
   console.log('load error:', element, index);
-  // removeImage(index);
-  showErrorNotification(`Error loading image ${element.name}`);
-}
-
-function showErrorNotification(message: string) {
+  removeImage(index);
   $q.notify({
     type: 'negative',
-    message: message,
+    message: `Error loading image ${element.name}`,
     position: 'bottom',
     closeBtn: true,
   });
 }
+
 
 // TODO ADDING / REMOVING / REORDING THE LIST TRIGGERS RELOADS :(
 </script>
@@ -55,7 +52,7 @@ function showErrorNotification(message: string) {
         <template #item="{ element, index }">
           <div class="thumbnail">
             <img
-              :src="element.src"
+              :src="element.blobUrl"
               @load="onLoadEnd(element, index)"
               @error="onLoadError(element, index)"
               alt="Thumbnail"

@@ -4,9 +4,13 @@ import { ImageItem } from 'src/types/imageItem';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
 
+    const DOWNLOAD_RETRIES = 3;
+    const DOWNLOAD_RETRY_DELAY_MILLIS = 500;
+
     const imageList = ref<ImageItem[]>([]);
 
     function removeImage(index: number) {
+        URL.revokeObjectURL(imageList.value[index].blobUrl);
         imageList.value.splice(index, 1);
     }
 
@@ -15,33 +19,34 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
             return;
         }
 
-        console.log('file load start:', file);
-
-        // TODO IT IS POSSIBLE TO RECORD LOADING (BOOLEAN) AND ERROR (BOOLEAN) IN IMAGElIST ELEMENTS
-
-        const reader = new FileReader();
-        reader.onload = (e: ProgressEvent<FileReader>) => {
-            if (e.target?.result) {
-                imageList.value.push({
-                    src: e.target.result.toString(),
-                    name: file.name,
-                });
-            }
-        };
-        reader.readAsDataURL(file);
+        imageList.value.push({
+            blobUrl: URL.createObjectURL(file),
+            name: file.name,
+        });
     }
 
-    function addImageFromUrl(url: string | null | undefined) {
+    async function addImageFromUrl(url: string) {
         if (!url) {
             return;
         }
 
-        console.log('url load start:', url);
+        for (let i = DOWNLOAD_RETRIES - 1; i >= 0; --i) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    imageList.value.push({
+                        blobUrl: URL.createObjectURL(await response.blob()),
+                        name: url.split('/').pop() || url
+                    });
+                    return;
+                }
+            } catch {
+            }
+            await new Promise(resolve => setTimeout(resolve,
+                    DOWNLOAD_RETRY_DELAY_MILLIS));
+        }
 
-        imageList.value.push({
-            src: url,
-            name: url,
-        });
+        throw new Error(`Error downloading ${url}`);
     }
 
     return { imageList, removeImage, addImageFromFile, addImageFromUrl };

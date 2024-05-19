@@ -1,4 +1,4 @@
 export interface ImageItem {
-    src: string;
+    blobUrl: string;
     name: string;
 }

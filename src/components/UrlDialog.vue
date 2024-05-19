@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useImageLibraryStore } from 'stores/imageLibraryStore';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
 
 interface Props {
   visible: boolean;
@@ -17,17 +20,30 @@ const { addImageFromUrl } = imageLibraryStore;
 
 const imageUrl = ref<string>('');
 
-function emitUpdateVisible(newVal: boolean) {
-  emit('update:visible', newVal);
-}
-
 function closeUrlDialog() {
   imageUrl.value = '';
-  emitUpdateVisible(false);
+  emit('update:visible', false);
+}
+
+function onDownloadStarted(url: string) {
+  console.log(`Download started: ${url}`);
+}
+
+function onDownloadEnded(url: string) {
+  console.log(`Download ended: ${url}`);
 }
 
 function addImage() {
-  addImageFromUrl(imageUrl.value);
+  const url = imageUrl.value;
+  onDownloadStarted(url);
+  addImageFromUrl(url)
+    .then(() => onDownloadEnded(url))
+    .catch((e: Error) => $q.notify({
+      type: 'negative',
+      message: e.message,
+      position: 'bottom',
+      closeBtn: true,
+    }));
   closeUrlDialog();
 }
 </script>
