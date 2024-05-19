@@ -9,20 +9,32 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
 
     const imageList = ref<ImageItem[]>([]);
 
-    function removeImage(index: number) {
-        URL.revokeObjectURL(imageList.value[index].blobUrl);
+    let idSequence = 0;
+
+    function addImage(displayName: string, blobUrl: string) {
+        console.log(`Adding blob URL: ${blobUrl}`); // TODO TESTING REMOVE
+        imageList.value.push({
+            id: idSequence.toString(),
+            displayName,
+            blobUrl,
+        });
+        ++idSequence;
+    }
+
+    function removeImage(id: string) {
+        const index = imageList.value.findIndex(item => item.id === id);
+        if (index < 0) {
+            return;
+        }
+        const removedItem = imageList.value[index];
+        URL.revokeObjectURL(removedItem.blobUrl);
         imageList.value.splice(index, 1);
     }
 
     function addImageFromFile(file: File | null | undefined) {
-        if (!file) {
-            return;
+        if (file) {
+            addImage(file.name, URL.createObjectURL(file));
         }
-
-        imageList.value.push({
-            blobUrl: URL.createObjectURL(file),
-            name: file.name,
-        });
     }
 
     async function addImageFromUrl(url: string) {
@@ -34,10 +46,8 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
             try {
                 const response = await fetch(url);
                 if (response.ok) {
-                    imageList.value.push({
-                        blobUrl: URL.createObjectURL(await response.blob()),
-                        name: url.split('/').pop() || url
-                    });
+                    addImage(url.split('/').pop() || url,
+                            URL.createObjectURL(await response.blob()));
                     return;
                 }
             } catch {
