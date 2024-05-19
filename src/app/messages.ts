@@ -10,4 +10,3 @@ export class Message<T> {
     constructor(public type: RequestType | ResponseType, public data: T) {
     }
 }
-

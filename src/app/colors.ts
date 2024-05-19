@@ -1,7 +1,5 @@
 import chroma from 'chroma-js';
 
-const BLACK_LUMINANCE = 10;
-
 const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAAAAAABfAACHAACvAADXAAD/AF8AAF9fAF+HAF+' +
     'vAF/XAF//AIcAAIdfAIeHAIevAIfXAIf/AK8AAK9fAK+HAK+vAK/XAK//ANcAANdfANeHANevANfXANf/AP8AAP9fAP+HAP+vAP/XAP//XwAAXwB' +
     'fXwCHXwCvXwDXXwD/X18AX19fX1+HX1+vX1/XX1//X4cAX4dfX4eHX4evX4fXX4f/X68AX69fX6+HX6+vX6/XX6//X9cAX9dfX9eHX9evX9fXX9f' +
@@ -15,9 +13,16 @@ const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAA
 
 const buffer = atob(RGBS);
 
+export enum Palette {
+    STANDARD_8,
+    STANDARD_16,
+    EXTENDED_240,
+    EXTENDED_256,
+}
+
 const palette = new Array<number[]>(256);
 
-const closestColorCache = new Map<number, number>(); // TODO LIMIT THE SIZE OF THIS MAP?
+const closestColorCache = new Map<number, number>();
 
 export function loadHtmlColors(): string[] {
     const htmlColors = new Array<string>(256);
@@ -31,7 +36,13 @@ export function loadHtmlColors(): string[] {
     return htmlColors;
 }
 
-export function findClosestColorIndex(r: number, g: number, b: number, a: number) {
+export function clearClosestColorCache() {
+    closestColorCache.clear();
+}
+
+export function findClosestColorIndexAmong(indices: number[], darkness: number,
+                                           r: number, g: number, b: number, a: number) {
+
     const key = (r << 24) | (g << 16) | (b << 8) | a;
     const value = closestColorCache.get(key);
     if (value !== undefined) {
@@ -41,11 +52,62 @@ export function findClosestColorIndex(r: number, g: number, b: number, a: number
     let index = 0;
     const c = chroma(r, g, b).lab();
     c[0] *= a / 255;
-    if (c[0] >= BLACK_LUMINANCE) {
+    if (c[0] >= darkness) {
+        let error = Number.MAX_VALUE;
+        for (let i = indices.length - 1; i >= 0; --i) {
+            const p = palette[indices[i]];
+            const dl = p[0] - c[0];
+            const da = p[1] - c[1];
+            const db = p[2] - c[2];
+            const e = dl * dl + da * da + db * db;
+            if (e < error) {
+                error = e;
+                index = indices[i];
+            }
+        }
+    }
+
+    closestColorCache.set(key, index);
+    return index;
+}
+
+export function findClosestColorIndex(pal: Palette, darkness: number,
+                                      r: number, g: number, b: number, a: number) {
+
+    const key = (r << 24) | (g << 16) | (b << 8) | a;
+    const value = closestColorCache.get(key);
+    if (value !== undefined) {
+        return value;
+    }
+
+    let index = 0;
+    const c = chroma(r, g, b).lab();
+    c[0] *= a / 255;
+    if (c[0] >= darkness) {
         let error = Number.MAX_VALUE;
 
-        // Do not compare against the traditional 16 ANSI colors since they are commonly redefined.
-        for (let i = 255; i >= 16; --i) {
+        let i: number;
+        let minIndex: number;
+        switch (pal) {
+            case Palette.STANDARD_8:
+                i = 7;
+                minIndex = 0;
+                break;
+            case Palette.STANDARD_16:
+                i = 15;
+                minIndex = 0;
+                break;
+            case Palette.EXTENDED_240:
+                i = 255;
+                minIndex = 16; // Do not compare against the standard 16 ANSI colors since they are commonly redefined.
+                break;
+            default:
+                i = 255;
+                minIndex = 0;
+                break;
+        }
+
+        for (; i >= minIndex; --i) {
             const p = palette[i];
             const dl = p[0] - c[0];
             const da = p[1] - c[1];

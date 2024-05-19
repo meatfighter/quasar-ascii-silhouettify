@@ -1,52 +1,95 @@
-export class ImageData {
-    constructor(public indices: Uint8Array, public width: number, public height: number) {
+import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong, Palette } from 'src/app/colors';
+import { ImageItem } from 'src/types/imageItem';
+
+export class ImageContent {
+    constructor(public indices: Uint8Array, public width: number, public height: number,
+                public neofetchIndices: number[], public neofetchStyles: string[]) {
     }
 }
 
-export class ImageDataRequest {
-    constructor(public imageId: string, public dataUrl: string) {
+export function getIndex(imageContent: ImageContent, x: number, y: number) {
+    const X = Math.round(x);
+    const Y = Math.round(y);
+    if (X < 0 || Y < 0 || X >= imageContent.width || Y >= imageContent.height) {
+        return 0;
     }
+    return imageContent.indices[imageContent.width * Y + X];
 }
 
-export class ImageDataResponse {
-    constructor(public success: boolean, public imageData: ImageData | undefined) {
-    }
+export async function loadImageData(src: string): Promise<ImageData> {
+    return new Promise<ImageData>((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (ctx === null) {
+                reject(new Error('Failed to get 2D image context.'));
+                return;
+            }
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            resolve(ctx.getImageData(0, 0, img.width, img.height));
+        };
+        img.onerror = () => {
+            reject(new Error('Error loading image.'));
+        };
+    });
 }
 
-// This function takes a data URL and a callback function that will receive the RGBA data array.
-export function extractRGBAFromDataURL(dataURL: string, callback: (rgba: Uint8ClampedArray, width: number, height: number) => void): void {
-    // Create an image element
-    const img = new Image();
+export async function extractImageContent(imageItem: ImageItem, pal: Palette, colors: number, darkness: number):
+        Promise<ImageContent> {
 
-    // Set the image source to the provided data URL
-    img.src = dataURL;
+    return new Promise<ImageContent>((resolve, reject) => {
+        loadImageData(imageItem.blobUrl)
+            .then(imageData => resolve(createImageContent(imageData, pal, colors, darkness)))
+            .catch(() => reject(new Error(`Error loading image ${imageItem.displayName}`)));
+    });
+}
 
-    // This event listener will be called once the image is loaded
-    img.onload = () => {
-        // Create a canvas element
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d'); // TODO REVIEW
-        if (ctx === null) {
-            return;
+function createImageContent(imageData: ImageData, pal: Palette, colors: number, darkness: number) {
+    const data = imageData.data;
+    const indices = new Uint8Array(imageData.width * imageData.height);
+    const frequencies = new Array<number>(256).fill(0);
+
+    clearClosestColorCache();
+    for (let i = 0, j = 0; i < indices.length; ++i) {
+        ++frequencies[indices[i] = findClosestColorIndex(pal, darkness, data[j++], data[j++], data[j++], data[j++])];
+    }
+    clearClosestColorCache();
+
+    const neofetchIndices: number[] = [];
+    const neofetchStyles = new Array<string>(256);
+    while (true) {
+        let maxIndex = -1;
+        let maxFrequency = 0;
+        for (let i = frequencies.length - 1; i > 0; --i) {
+            if (frequencies[i] > maxFrequency) {
+                maxIndex = i;
+                maxFrequency = frequencies[i];
+            }
         }
+        if (maxIndex < 0) {
+            break;
+        }
+        frequencies[maxIndex] = 0;
+        neofetchIndices.push(maxIndex);
+        if (neofetchIndices.length <= 6) {
+            neofetchStyles[maxIndex] = `\${c${neofetchIndices.length}}`;
+        }
+    }
 
+    if (neofetchIndices.length <= colors) {
+        return new ImageContent(indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
+    }
 
-        // Set canvas dimensions to image dimensions
-        canvas.width = img.width;
-        canvas.height = img.height;
+    neofetchIndices.length = colors;
 
-        // Draw the image onto the canvas
-        ctx.drawImage(img, 0, 0);
+    for (let i = 0, j = 0; i < indices.length; ++i) {
+        indices[i] = findClosestColorIndexAmong(neofetchIndices, darkness, data[j++], data[j++], data[j++], data[j++]);
+    }
+    clearClosestColorCache();
 
-        // Retrieve the pixel data from the canvas
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-
-        // Call the callback function with the RGBA data, width, and height
-        callback(imageData.data, img.width, img.height);
-    };
-
-    // Error handling for image loading
-    img.onerror = () => {
-        console.error('Failed to load image from data URL');
-    };
+    return new ImageContent(indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
 }

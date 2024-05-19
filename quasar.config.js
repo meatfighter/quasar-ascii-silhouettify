@@ -72,7 +72,7 @@ module.exports = configure(function (/* ctx */) {
           rollupOptions: {
             input: {
               main: resolve(__dirname, 'index.html'),
-              worker: resolve(__dirname, 'src/worker.ts')
+              worker: resolve(__dirname, 'src/app/worker.ts')
             },
             output: {
               entryFileNames: (chunk) => {
