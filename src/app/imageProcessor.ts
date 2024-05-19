@@ -1,8 +1,8 @@
 import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong, Palette } from 'src/app/colors';
-import { ImageItem } from 'src/types/imageItem';
+import { ImageTask } from 'src/app/imageTask';
 
 export class ImageContent {
-    constructor(public indices: Uint8Array, public width: number, public height: number,
+    constructor(public id: string, public indices: Uint8Array, public width: number, public height: number,
                 public neofetchIndices: number[], public neofetchStyles: string[]) {
     }
 }
@@ -38,17 +38,7 @@ export async function loadImageData(src: string): Promise<ImageData> {
     });
 }
 
-export async function extractImageContent(imageItem: ImageItem, pal: Palette, colors: number, darkness: number):
-        Promise<ImageContent> {
-
-    return new Promise<ImageContent>((resolve, reject) => {
-        loadImageData(imageItem.blobUrl)
-            .then(imageData => resolve(createImageContent(imageData, pal, colors, darkness)))
-            .catch(() => reject(new Error(`Error loading image ${imageItem.displayName}`)));
-    });
-}
-
-function createImageContent(imageData: ImageData, pal: Palette, colors: number, darkness: number) {
+function createImageContent(id: string, imageData: ImageData, pal: Palette, colors: number, darkness: number) {
     const data = imageData.data;
     const indices = new Uint8Array(imageData.width * imageData.height);
     const frequencies = new Array<number>(256).fill(0);
@@ -81,7 +71,7 @@ function createImageContent(imageData: ImageData, pal: Palette, colors: number, 
     }
 
     if (neofetchIndices.length <= colors) {
-        return new ImageContent(indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
+        return new ImageContent(id, indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
     }
 
     neofetchIndices.length = colors;
@@ -91,5 +81,24 @@ function createImageContent(imageData: ImageData, pal: Palette, colors: number, 
     }
     clearClosestColorCache();
 
-    return new ImageContent(indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
+    return new ImageContent(id, indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
+}
+
+const tasks = new Map<string, ImageTask>();
+
+export async function extractImageContent(task: ImageTask): Promise<ImageContent | null> {
+    tasks.set(task.id, task);
+    try {
+        const imageData = await loadImageData(task.imageItem.blobUrl);
+        return task.cancelled ? null : createImageContent(task.id, imageData, task.pal, task.colors, task.darkness);
+    } finally {
+        tasks.delete(task.id);
+    }
+}
+
+export async function cancelTask(id: string) {
+    const task = tasks.get(id);
+    if (task) {
+        task.cancelled = true;
+    }
 }

@@ -1,4 +1,4 @@
 export default class Ascii {
-    constructor(public text: string, public matched: number) {
+    constructor(public id: string, public text: string, public matched: number) {
     }
 }

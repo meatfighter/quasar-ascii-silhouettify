@@ -5,7 +5,11 @@ import { Format } from 'src/app/format';
 import { Palette } from 'src/app/colors';
 
 export default class AsciiTask {
+
+    cancelled = false;
+
     constructor(
+        public id: string,
         public offsets: Offset[],
         public image: ImageContent,
         public glyphInfo: GlyphInfo,

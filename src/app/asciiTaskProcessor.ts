@@ -1,11 +1,12 @@
 import AsciiTask from 'src/app/asciiTask';
 import Ascii from 'src/app/ascii';
-import { getIndex } from 'src/app/images';
+import { getIndex } from 'src/app/imageProcessor';
 import { Format } from 'src/app/format';
 import { Palette } from 'src/app/colors';
 import { getEOL } from 'src/utils/os';
+import { yieldToEventThread } from 'src/utils/threads';
 
-function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Ascii {
+async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
@@ -64,12 +65,17 @@ function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): A
             matched += glyphs[glyphIndex].count;
         }
         text += getEOL();
+
+        await yieldToEventThread();
+        if (task.cancelled) {
+            return null;
+        }
     }
 
-    return new Ascii(text, matched);
+    return new Ascii(task.id, text, matched);
 }
 
-function toColorAscii(task: AsciiTask, originX: number, originY: number): Ascii {
+async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format, palette, htmlColors }
             = task;
@@ -215,6 +221,11 @@ function toColorAscii(task: AsciiTask, originX: number, originY: number): Ascii 
             matched += glyphs[bestGlyphIndex].count;
         }
         text += getEOL();
+
+        await yieldToEventThread();
+        if (task.cancelled) {
+            return null;
+        }
     }
 
     switch (format) {
@@ -237,19 +248,36 @@ function toColorAscii(task: AsciiTask, originX: number, originY: number): Ascii 
             break;
     }
 
-    return new Ascii(text, matched);
+    return new Ascii(task.id, text, matched);
 }
 
-export function toAscii(task: AsciiTask) {
+const tasks = new Map<string, AsciiTask>();
+
+export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
+    tasks.set(task.id, task);
+
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
-    let ascii = new Ascii('', 0);
-    task.offsets.forEach(offset => {
-        const result = func(task, offset.x + task.marginX, offset.y + task.marginY);
+    let ascii = new Ascii(task.id, '', 0);
+    for (let i = task.offsets.length - 1; i >= 0; --i) {
+        const offset = task.offsets[i];
+        const result = await func(task, offset.x + task.marginX, offset.y + task.marginY);
+        if (!result) {
+            break;
+        }
         if (result.matched > ascii.matched) {
             ascii = result;
         }
-    });
+    }
 
-    return ascii;
+    tasks.delete(task.id);
+
+    return task.cancelled ? null : ascii;
+}
+
+export async function cancelTask(id: string) {
+    const task = tasks.get(id);
+    if (task) {
+        task.cancelled = true;
+    }
 }
