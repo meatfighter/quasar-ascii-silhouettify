@@ -177,7 +177,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
                 switch (format) {
                     case Format.HTML:
                         if (notFirstSpan) {
-                            text += "</span>";
+                            text += '</span>';
                         }
                         text += `<span style="color: #${htmlColors[bestColorIndex]};">`;
                         notFirstSpan = true;
@@ -231,7 +231,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
     switch (format) {
         case Format.HTML:
             if (notFirstSpan) {
-                text += "</span>";
+                text += '</span>';
             }
             break;
         case Format.NEOFETCH: {
@@ -275,7 +275,7 @@ export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
     return task.cancelled ? null : ascii;
 }
 
-export async function cancelTask(id: string) {
+export function cancelAsciiTask(id: string) {
     const task = tasks.get(id);
     if (task) {
         task.cancelled = true;

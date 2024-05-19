@@ -84,19 +84,32 @@ function createImageContent(id: string, imageData: ImageData, pal: Palette, colo
     return new ImageContent(id, indices, imageData.width, imageData.height, neofetchIndices, neofetchStyles);
 }
 
+export class ImageContentResult {
+    constructor(public id: string,
+                public errorMessage: string | null,
+                public imageContent: ImageContent | null) {
+    }
+}
+
 const tasks = new Map<string, ImageTask>();
 
-export async function extractImageContent(task: ImageTask): Promise<ImageContent | null> {
+export async function extractImageContent(task: ImageTask): Promise<ImageContentResult> {
     tasks.set(task.id, task);
     try {
         const imageData = await loadImageData(task.imageItem.blobUrl);
-        return task.cancelled ? null : createImageContent(task.id, imageData, task.pal, task.colors, task.darkness);
+        if (task.cancelled) {
+            return new ImageContentResult(task.id, 'cancelled', null);
+        }
+        return new ImageContentResult(task.id, null,
+                createImageContent(task.id, imageData, task.pal, task.colors, task.darkness));
+    } catch (e) {
+        return new ImageContentResult(task.id, (e as Error).message, null);
     } finally {
         tasks.delete(task.id);
     }
 }
 
-export async function cancelTask(id: string) {
+export function cancelImageTask(id: string) {
     const task = tasks.get(id);
     if (task) {
         task.cancelled = true;

@@ -1,5 +1,5 @@
 import Offset from 'src/app/offset';
-import { ImageContent } from 'src/app/images';
+import { ImageContent } from 'src/app/imageProcessor';
 import { GlyphInfo } from 'src/app/glyphs';
 import { Format } from 'src/app/format';
 import { Palette } from 'src/app/colors';
