@@ -1,24 +1,42 @@
 import { loadHtmlColors, Palette } from 'src/app/colors';
 import { loadGlyphs } from 'src/app/glyphs';
-import { ImageItem } from 'src/types/imageItem';
+import ImageItem from 'src/types/imageItem';
 import { Format } from 'src/app/format';
 import { Message, MessageType } from 'src/app/messages';
 import { ImageContentResult } from 'src/app/imageProcessor';
 import Ascii from 'src/app/ascii';
+import ImageTask from 'src/app/imageTask';
+import AsciiTask from 'src/app/asciiTask';
 
 // ./dist/spa/assets/worker.js
 
-let workers: Worker[] = [];
+export interface ConvertParams {
+    palette: Palette;
+    colors: number;
+    darkness: number;
+    color: boolean;
+    imageScale: number;
+    fontSize: number;
+    lineHeight: number;
+    format: Format;
+}
+
+interface ProcessingState {
+    id: string;
+    worker: Worker;
+    imageContentResult?: ImageContentResult;
+    ascii?: Ascii;
+}
 
 const htmlColors = loadHtmlColors();
 const glyphInfo = await loadGlyphs();
 
-let taskSequence = 0;
+let workers: Worker[] = [];
+let processingSequence = 0;
 let workerIndex = 0;
+let params: ConvertParams;
 
-const imageContentResults = new Map<string, ImageContentResult>();
-const asciiResults = new Map<string, Ascii>();
-const taskWorkers = new Map<string, Worker>();
+const processingStates = new Map<string, ProcessingState>;
 
 function adjustWorkersPool(threads: number) {
     if (workers.length > threads) {
@@ -26,21 +44,22 @@ function adjustWorkersPool(threads: number) {
             workers[i].terminate();
         }
         workers.length = threads;
-    }
-    while (workers.length < threads) {
-        const worker = new Worker('worker.js');
-        worker.onmessage = <T>(event: MessageEvent<Message<T>>) => {
-            const message = event.data;
-            switch (message.type) {
-                case MessageType.IMAGE_CONTENT_RESULT:
-                    handleImageContentResult(message.data as ImageContentResult);
-                    break;
-                case MessageType.ASCII_RESULT:
-                    handleAsciiResult(message.data as Ascii);
-                    break;
-            }
-        };
-        workers.push(worker);
+    } else {
+        while (workers.length < threads) {
+            const worker = new Worker('worker.js');
+            worker.onmessage = <T>(event: MessageEvent<Message<T>>) => {
+                const message = event.data;
+                switch (message.type) {
+                    case MessageType.IMAGE_CONTENT_RESULT:
+                        handleImageContentResult(message.data as ImageContentResult);
+                        break;
+                    case MessageType.ASCII_RESULT:
+                        handleAsciiResult(message.data as Ascii);
+                        break;
+                }
+            };
+            workers.push(worker);
+        }
     }
 }
 
@@ -52,16 +71,32 @@ function handleAsciiResult(ascii: Ascii) {
 
 }
 
-function postMessage() {
+// function postTask(type: MessageType, task: { id: string; }) {
+//     workerIndex = (workerIndex + 1) % workers.length;
+//     const worker = workers[workerIndex];
+//     const processingState = processingStates.get(task.id);
+//     if (processingState) {
+//         processingState.worker = worker;
+//     } else {
+//         processingStates.set(task.id, new ProcessingState(task.id, worker));
+//     }
+//     worker.postMessage(new Message(type, task));
+// }
 
+function cancelAll() {
+    for (const processingState of processingStates.values()) {
+        processingState.worker.postMessage(new Message(processingState.imageContentResult
+                ? MessageType.CANCEL_CONVERT_TO_ASCII : MessageType.CANCEL_EXTRACT_IMAGE_CONTENT, processingState.id));
+    }
+    processingStates.clear();
 }
 
-function postImageTasks(imageItems: ImageItem[])
+export function convert(threads: number, imageItems: ImageItem[], convertParams: ConvertParams) {
 
-export function convert(imageItems: ImageItem[], color: boolean, imageScale: number, fontSize: number,
-                        lineHeight: number, format: Format, palette: Palette, htmlColors: string[], threads: number) {
-
+    cancelAll();
     adjustWorkersPool(threads);
+    params = convertParams;
+
 }
 
 

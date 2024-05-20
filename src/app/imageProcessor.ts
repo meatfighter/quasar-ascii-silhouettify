@@ -101,7 +101,7 @@ export async function extractImageContent(task: ImageTask): Promise<ImageContent
             return new ImageContentResult(task.id, 'cancelled', null);
         }
         return new ImageContentResult(task.id, null,
-                createImageContent(task.id, imageData, task.pal, task.colors, task.darkness));
+                createImageContent(task.id, imageData, task.palette, task.colors, task.darkness));
     } catch (e) {
         return new ImageContentResult(task.id, (e as Error).message, null);
     } finally {

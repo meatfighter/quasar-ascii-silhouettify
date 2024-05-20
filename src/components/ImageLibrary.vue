@@ -4,7 +4,7 @@ import { MoveEvent } from 'sortablejs';
 import { useImageLibraryStore } from 'stores/imageLibraryStore';
 import { storeToRefs } from 'pinia';
 import ImageLibraryToolbar from 'components/ImageLibraryToolbar.vue';
-import { ImageItem } from 'src/types/imageItem';
+import ImageItem from 'src/types/imageItem';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
