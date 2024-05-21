@@ -6,14 +6,12 @@ import { useQuasar } from 'quasar';
 const $q = useQuasar();
 
 interface Props {
-  visible: boolean;
+  modelValue: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
-  visible: false,
-});
+defineProps<Props>();
 
-const emit = defineEmits(['update:visible']); // TODO USE V-MODEL TO SIMPLIFY THIS
+const emit = defineEmits(['update:modelValue']);
 
 const imageLibraryStore = useImageLibraryStore();
 const { addImageFromUrl } = imageLibraryStore;
@@ -22,7 +20,7 @@ const imageUrl = ref<string>('');
 
 function closeUrlDialog() {
   imageUrl.value = '';
-  emit('update:visible', false);
+  emit('update:modelValue', false);
 }
 
 function onDownloadStarted(url: string) {
@@ -49,7 +47,7 @@ function addImage() {
 </script>
 
 <template>
-  <q-dialog :model-value="visible">
+  <q-dialog :model-value="modelValue">
     <q-card>
       <q-card-section>
         <div class="text-h6">Enter Image URL</div>

@@ -33,7 +33,7 @@
 
     <q-btn label="Add URL" icon="cloud_upload" rounded no-caps color="primary" @click="showUrlDialog"/>
   </div>
-  <url-dialog :visible="urlDialogVisible" @update:visible="urlDialogVisible = $event;"/>
+  <url-dialog v-model="urlDialogVisible"/>
 </template>
 
 <style scoped>
