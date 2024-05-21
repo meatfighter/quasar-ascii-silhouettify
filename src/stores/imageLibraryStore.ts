@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { ImageItem } from 'src/types/imageItem';
+import ImageItem from 'src/types/imageItem';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
 

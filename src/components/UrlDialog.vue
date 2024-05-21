@@ -13,7 +13,7 @@ withDefaults(defineProps<Props>(), {
   visible: false,
 });
 
-const emit = defineEmits(['update:visible']);
+const emit = defineEmits(['update:visible']); // TODO USE V-MODEL TO SIMPLIFY THIS
 
 const imageLibraryStore = useImageLibraryStore();
 const { addImageFromUrl } = imageLibraryStore;

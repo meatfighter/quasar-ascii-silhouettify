@@ -1,5 +1,5 @@
 import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong, Palette } from 'src/app/colors';
-import { ImageTask } from 'src/app/imageTask';
+import ImageTask from 'src/app/imageTask';
 
 export class ImageContent {
     constructor(public id: string, public indices: Uint8Array, public width: number, public height: number,
@@ -86,7 +86,6 @@ function createImageContent(id: string, imageData: ImageData, pal: Palette, colo
 
 export class ImageContentResult {
     constructor(public id: string,
-                public errorMessage: string | null,
                 public imageContent: ImageContent | null) {
     }
 }
@@ -98,12 +97,12 @@ export async function extractImageContent(task: ImageTask): Promise<ImageContent
     try {
         const imageData = await loadImageData(task.imageItem.blobUrl);
         if (task.cancelled) {
-            return new ImageContentResult(task.id, 'cancelled', null);
+            return new ImageContentResult(task.id, null);
         }
-        return new ImageContentResult(task.id, null,
-                createImageContent(task.id, imageData, task.palette, task.colors, task.darkness));
-    } catch (e) {
-        return new ImageContentResult(task.id, (e as Error).message, null);
+        return new ImageContentResult(task.id, createImageContent(task.id, imageData, task.palette, task.colors,
+                task.darkness));
+    } catch {
+        return new ImageContentResult(task.id, null);
     } finally {
         tasks.delete(task.id);
     }

@@ -10,6 +10,7 @@ export default class AsciiTask {
 
     constructor(
         public id: string,
+        public processingId: string,
         public offsets: Offset[],
         public image: ImageContent,
         public glyphInfo: GlyphInfo,

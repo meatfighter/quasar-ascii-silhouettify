@@ -72,7 +72,7 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
         }
     }
 
-    return new Ascii(task.id, text, matched);
+    return new Ascii(task.id, task.processingId, text, matched);
 }
 
 async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
@@ -248,7 +248,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             break;
     }
 
-    return new Ascii(task.id, text, matched);
+    return new Ascii(task.id, task.processingId, text, matched);
 }
 
 const tasks = new Map<string, AsciiTask>();
@@ -258,7 +258,7 @@ export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
 
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
-    let ascii = new Ascii(task.id, '', 0);
+    let ascii = new Ascii(task.id, task.processingId, '', 0);
     for (let i = task.offsets.length - 1; i >= 0; --i) {
         const offset = task.offsets[i];
         const result = await func(task, offset.x + task.marginX, offset.y + task.marginY);

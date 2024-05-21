@@ -1,5 +1,5 @@
 import { Message, MessageType } from 'src/app/messages';
-import { ImageTask } from 'src/app/imageTask';
+import ImageTask from 'src/app/imageTask';
 import AsciiTask from 'src/app/asciiTask';
 import { cancelImageTask, extractImageContent } from 'src/app/imageProcessor';
 import { cancelAsciiTask, toAscii } from 'src/app/asciiTaskProcessor';
