@@ -35,6 +35,7 @@ class ProcessingState {
     }
 }
 
+// TODO PINIA STORE!!!
 const htmlColors = loadHtmlColors();
 const glyphInfo = await loadGlyphs();
 
@@ -114,7 +115,7 @@ function handleImageContentResult(imageContentResult: ImageContentResult) {
         asciiWorkers.set(id, worker);
         worker.postMessage(new Message(MessageType.CONVERT_TO_ASCII, new AsciiTask(id, imageContentResult.id, off,
                 imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX, marginY,
-                options.color, options.format, options.palette, htmlColors)));
+                options.color)));
     });
 }
 

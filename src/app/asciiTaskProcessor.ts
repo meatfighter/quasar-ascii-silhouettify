@@ -1,17 +1,17 @@
 import AsciiTask from 'src/app/asciiTask';
-import Ascii from 'src/app/ascii';
+import { Ascii, TextBlock } from 'src/app/ascii';
 import { getIndex } from 'src/app/imageProcessor';
-import { Format } from 'src/app/format';
-import { Palette } from 'src/app/colors';
-import { getEOL } from 'src/utils/os';
 import { yieldToEventThread } from 'src/utils/threads';
+
+const SPACE = 0;
+const EOL = 255;
 
 async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
-    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format } = task;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
 
-    let text = '';
+    const glyphIndices: number[] = [];
     let matched = 0;
     const region = new Array<number>(3);
     for (let r = 0; r < rows; ++r) {
@@ -49,22 +49,12 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
             }
 
             // Append the printable ASCII character.
-            switch (format) {
-                case Format.HTML:
-                    text += glyphs[glyphIndex].htmlEscapedCharacter;
-                    break;
-                case Format.NEOFETCH:
-                    text += glyphs[glyphIndex].neofetchEscapedCharacter;
-                    break;
-                default:
-                    text += glyphs[glyphIndex].character;
-                    break;
-            }
+            glyphIndices.push(glyphIndex);
 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[glyphIndex].count;
         }
-        text += getEOL();
+        glyphIndices.push(EOL);
 
         await yieldToEventThread();
         if (task.cancelled) {
@@ -72,23 +62,20 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
         }
     }
 
-    return new Ascii(task.id, task.processingId, text, matched);
+    return new Ascii(task.id, task.processingId, [ new TextBlock(glyphIndices, -1) ], matched);
 }
 
 async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
-    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format, palette, htmlColors }
-            = task;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
-    const ansi16 = palette === Palette.STANDARD_8 || palette === Palette.STANDARD_16;
-    let text = '';
-    let notFirstSpan = false;
+    const textBlocks: TextBlock[] = [];
+    const glyphIndices: number[] = [];
     let lastColorIndex = -1;
     let matched = 0;
-    let neofetchColors = 0;
     for (let r = 0; r < rows; ++r) {
         const glyphOriginY = originY + rowScale * r;
         for (let c = 0; c < cols; ++c) {
@@ -119,7 +106,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
 
             // If there are no counts, then the region is very dark. Replace with a space character in that case.
             if (colorIndexCounts.size === 0) {
-                text += ' ';
+                glyphIndices.push(SPACE);
                 continue;
             }
 
@@ -167,60 +154,25 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             // If no best is found, then no non-space character of any color aligns with all the pixels in the region.
             // A space is the only acceptable character in that case.
             if (bestGlyphIndex === 0) {
-                text += ' ';
+                glyphIndices.push(SPACE);
                 continue;
             }
 
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
-            if (lastColorIndex !== bestColorIndex) {
-                switch (format) {
-                    case Format.HTML:
-                        if (notFirstSpan) {
-                            text += '</span>';
-                        }
-                        text += `<span style="color: #${htmlColors[bestColorIndex]};">`;
-                        notFirstSpan = true;
-                        break;
-                    case Format.NEOFETCH: {
-                        const style = image.neofetchStyles[bestColorIndex];
-                        neofetchColors = Math.max(neofetchColors, style.charCodeAt(3) - 48);
-                        text += style;
-                        break;
-                    }
-                    default:
-                        if (ansi16) {
-                            if (bestColorIndex < 8) {
-                                text += `\x1b[3${bestColorIndex}m`;
-                            } else {
-                                text += `\x1b[1;3${bestColorIndex - 8}m`;
-                            }
-                        } else {
-                            text += `\x1b[38;5;${bestColorIndex}m`;
-                        }
-                        break;
-                }
-
-                lastColorIndex = bestColorIndex;
+            if (lastColorIndex !== bestColorIndex && lastColorIndex >= 0) {
+                textBlocks.push(new TextBlock(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
+                glyphIndices.length = 0;
             }
+            lastColorIndex = bestColorIndex;
 
             // Append the printable ASCII character.
-            switch (format) {
-                case Format.HTML:
-                    text += glyphs[bestGlyphIndex].htmlEscapedCharacter;
-                    break;
-                case Format.NEOFETCH:
-                    text += glyphs[bestGlyphIndex].neofetchEscapedCharacter;
-                    break;
-                default:
-                    text += glyphs[bestGlyphIndex].character;
-                    break;
-            }
+            glyphIndices.push(bestGlyphIndex);
 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[bestGlyphIndex].count;
         }
-        text += getEOL();
+        glyphIndices.push(EOL);
 
         await yieldToEventThread();
         if (task.cancelled) {
@@ -228,27 +180,11 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
         }
     }
 
-    switch (format) {
-        case Format.HTML:
-            if (notFirstSpan) {
-                text += '</span>';
-            }
-            break;
-        case Format.NEOFETCH: {
-            let header = 'colors';
-            for (let i = 0; i < neofetchColors; ++i) {
-                header += ` ${image.neofetchIndices[i]}`;
-            }
-            text = header + getEOL() + getEOL() + text;
-            break;
-        }
-        default:
-            // Append ANSI escape code to reset the text formatting to the terminal's default settings.
-            text += '\x1b[0m';
-            break;
+    if (glyphIndices.length > 0) {
+        textBlocks.push(new TextBlock(glyphIndices, lastColorIndex));
     }
 
-    return new Ascii(task.id, task.processingId, text, matched);
+    return new Ascii(task.id, task.processingId, textBlocks, matched);
 }
 
 const tasks = new Map<string, AsciiTask>();
@@ -258,7 +194,7 @@ export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
 
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
-    let ascii = new Ascii(task.id, task.processingId, '', 0);
+    let ascii = new Ascii(task.id, task.processingId, [], 0);
     for (let i = task.offsets.length - 1; i >= 0; --i) {
         const offset = task.offsets[i];
         const result = await func(task, offset.x + task.marginX, offset.y + task.marginY);

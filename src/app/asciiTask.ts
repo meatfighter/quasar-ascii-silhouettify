@@ -1,8 +1,6 @@
 import Offset from 'src/app/offset';
 import { ImageContent } from 'src/app/imageProcessor';
 import { GlyphInfo } from 'src/app/glyphs';
-import { Format } from 'src/app/format';
-import { Palette } from 'src/app/colors';
 
 export default class AsciiTask {
 
@@ -22,10 +20,7 @@ export default class AsciiTask {
         public colScale: number,
         public marginX: number,
         public marginY: number,
-        public color: boolean,
-        public format: Format,
-        public palette: Palette,
-        public htmlColors: string[]
+        public color: boolean
     ) {
     }
 }
