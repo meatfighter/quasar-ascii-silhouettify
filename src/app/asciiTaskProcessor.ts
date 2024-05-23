@@ -1,10 +1,8 @@
 import AsciiTask from 'src/app/asciiTask';
-import { Ascii, TextBlock } from 'src/app/ascii';
+import { Ascii, ColoredGlyphs } from 'src/app/ascii';
 import { getIndex } from 'src/app/imageProcessor';
 import { yieldToEventThread } from 'src/utils/threads';
-
-const SPACE = 0;
-const EOL = 255;
+import { EOL, SPACE } from 'src/app/glyphs';
 
 async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
@@ -62,7 +60,7 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
         }
     }
 
-    return new Ascii(task.id, task.processingId, [ new TextBlock(glyphIndices, -1) ], matched);
+    return new Ascii(task.id, task.processingId, [ new ColoredGlyphs(glyphIndices, -1) ], matched);
 }
 
 async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
@@ -72,7 +70,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
-    const textBlocks: TextBlock[] = [];
+    const textBlocks: ColoredGlyphs[] = [];
     const glyphIndices: number[] = [];
     let lastColorIndex = -1;
     let matched = 0;
@@ -161,7 +159,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
             if (lastColorIndex !== bestColorIndex && lastColorIndex >= 0) {
-                textBlocks.push(new TextBlock(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
+                textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
                 glyphIndices.length = 0;
             }
             lastColorIndex = bestColorIndex;
@@ -181,7 +179,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
     }
 
     if (glyphIndices.length > 0) {
-        textBlocks.push(new TextBlock(glyphIndices, lastColorIndex));
+        textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex));
     }
 
     return new Ascii(task.id, task.processingId, textBlocks, matched);

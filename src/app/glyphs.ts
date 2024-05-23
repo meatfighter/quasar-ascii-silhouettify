@@ -5,6 +5,9 @@ const GLYPHS_IMAGE_FILENAME = 'assets/glyphs.png';
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
+export const SPACE = 0;
+export const EOL = 255;
+
 class GlyphImage {
     htmlEscapedCharacter: string;
     neofetchEscapedCharacter: string;
@@ -78,7 +81,7 @@ export class GlyphInfo {
     }
 }
 
-export async function loadGlyphs(): Promise<GlyphInfo> {
+async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
     const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
     const imageData = await loadImageData(GLYPHS_IMAGE_FILENAME);
@@ -145,4 +148,13 @@ export async function loadGlyphs(): Promise<GlyphInfo> {
     }
 
     return new GlyphInfo(masks, glyphs, width, height, glyphs[1].count);
+}
+
+let glyphInfo: GlyphInfo;
+
+export async function getGlyphInfo() {
+    if (!glyphInfo) {
+        glyphInfo = await loadGlyphs();
+    }
+    return glyphInfo;
 }

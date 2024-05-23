@@ -1,10 +1,10 @@
-import { loadHtmlColors, Palette } from 'src/app/colors';
-import { loadGlyphs } from 'src/app/glyphs';
+import { Palette } from 'src/app/colors';
+import { getGlyphInfo } from 'src/app/glyphs';
 import ImageItem from 'src/types/imageItem';
 import { Format } from 'src/app/format';
 import { Message, MessageType } from 'src/app/messages';
 import { ImageContentResult } from 'src/app/imageProcessor';
-import Ascii from 'src/app/ascii';
+import { Ascii } from 'src/app/ascii';
 import ImageTask from 'src/app/imageTask';
 import Offset from 'src/app/offset';
 import partitionArray from 'src/app/array';
@@ -35,10 +35,6 @@ class ProcessingState {
     }
 }
 
-// TODO PINIA STORE!!!
-const htmlColors = loadHtmlColors();
-const glyphInfo = await loadGlyphs();
-
 const processingIds: string[] = [];
 const processingStates = new Map<string, ProcessingState>();
 const asciiWorkers = new Map<string, Worker>();
@@ -55,12 +51,12 @@ function adjustWorkersPool(threads: number) {
         workers.length = threads;
     } else {
         while (workers.length < threads) {
-            const worker = new Worker('worker.js');
+            const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
             worker.onmessage = <T>(event: MessageEvent<Message<T>>) => {
                 const message = event.data;
                 switch (message.type) {
                     case MessageType.IMAGE_CONTENT_RESULT:
-                        handleImageContentResult(message.data as ImageContentResult);
+                        void handleImageContentResult(message.data as ImageContentResult);
                         break;
                     case MessageType.ASCII_RESULT:
                         handleAsciiResult(message.data as Ascii);
@@ -72,7 +68,7 @@ function adjustWorkersPool(threads: number) {
     }
 }
 
-function handleImageContentResult(imageContentResult: ImageContentResult) {
+async function handleImageContentResult(imageContentResult: ImageContentResult) {
     const state = processingStates.get(imageContentResult.id);
     if (!state) {
         return;
@@ -82,6 +78,8 @@ function handleImageContentResult(imageContentResult: ImageContentResult) {
         return;
     }
     const imageContent = imageContentResult.imageContent;
+
+    const glyphInfo = await getGlyphInfo();
 
     const scaledGlyphWidth = glyphInfo.width * options.fontSize / 12;
     const scaledGlyphHeight = Math.round(options.lineHeight * options.fontSize * 96 / 72);
@@ -179,7 +177,6 @@ export function convert(convertOptions: ConvertOptions) {
     options = convertOptions;
     adjustWorkersPool(options.threads);
     postImageTasks();
-
 }
 
 

@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import ImageItem from 'src/types/imageItem';
+import { convert, ConvertOptions } from 'src/app/converter';
+import { Format } from 'src/app/format';
+import { Palette } from 'src/app/colors';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
 
@@ -19,6 +22,8 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
             blobUrl,
         });
         ++idSequence;
+
+        convert(new ConvertOptions([], Format.HTML, Palette.EXTENDED_240, 255, 12, 1.2, 1, 10, 12, true));
     }
 
     function removeImage(id: string) {

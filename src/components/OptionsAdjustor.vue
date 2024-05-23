@@ -103,10 +103,6 @@ function defaultsClicked() {
 .full-height-scroll-area {
   width: 100%;
   height: 100%;
-  //display: flex;
-  //justify-content: flex-start;
-  //align-items: center;
-  //position: relative;
   overflow: hidden;
   background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
 }

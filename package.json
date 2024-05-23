@@ -11,19 +11,20 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
-    "build": "quasar build"
+    "build": "quasar build",
+    "run": "http-server ./dist/spa"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "chroma-js": "^2.4.2",
     "pinia": "^2.1.7",
-    "quasar": "^2.8.0",
+    "quasar": "^2.16.4",
     "vue": "^3.4.18",
     "vue-router": "^4.0.12",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^1.8.0",
+    "@quasar/app-vite": "^1.9.3",
     "@types/chroma-js": "^2.4.4",
     "@types/node": "^12.20.21",
     "@types/sortablejs": "^1.15.8",
