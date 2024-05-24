@@ -1,6 +1,6 @@
 import AsciiTask from 'src/app/asciiTask';
 import { Ascii, ColoredGlyphs } from 'src/app/ascii';
-import { getIndex } from 'src/app/imageProcessor';
+import { getIndex } from 'src/app/imageContent';
 import { yieldToEventThread } from 'src/utils/threads';
 import { EOL, SPACE } from 'src/app/glyphs';
 

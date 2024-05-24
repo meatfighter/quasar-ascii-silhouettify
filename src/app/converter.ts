@@ -1,19 +1,15 @@
 import { Palette } from 'src/app/colors';
 import { getGlyphInfo } from 'src/app/glyphs';
-import ImageItem from 'src/types/imageItem';
 import { Format } from 'src/app/format';
 import { Message, MessageType } from 'src/app/messages';
-import { ImageContentResult } from 'src/app/imageProcessor';
 import { Ascii } from 'src/app/ascii';
-import ImageTask from 'src/app/imageTask';
 import Offset from 'src/app/offset';
 import partitionArray from 'src/app/array';
 import AsciiTask from 'src/app/asciiTask';
-
-// ./dist/spa/assets/worker.js
+import { ImageContent } from 'src/app/imageContent';
 
 export class ConvertOptions {
-    constructor(public imageItems: ImageItem[],
+    constructor(public imageContents: ImageContent[],
                 public format: Format,
                 public palette: Palette,
                 public colors: number,
@@ -27,7 +23,6 @@ export class ConvertOptions {
 }
 
 class ProcessingState {
-    imageContentResult: ImageContentResult | null = null;
     ascii: Ascii | null = null;
     partitions = 0;
 
@@ -37,7 +32,6 @@ class ProcessingState {
 
 const processingIds: string[] = [];
 const processingStates = new Map<string, ProcessingState>();
-const asciiWorkers = new Map<string, Worker>();
 
 const workers: Worker[] = [];
 let workerIndex = 0;
@@ -51,16 +45,11 @@ function adjustWorkersPool(threads: number) {
         workers.length = threads;
     } else {
         while (workers.length < threads) {
-            const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+            const worker = new Worker(new URL('./worker', import.meta.url), { type: 'module' });
             worker.onmessage = <T>(event: MessageEvent<Message<T>>) => {
                 const message = event.data;
-                switch (message.type) {
-                    case MessageType.IMAGE_CONTENT_RESULT:
-                        void handleImageContentResult(message.data as ImageContentResult);
-                        break;
-                    case MessageType.ASCII_RESULT:
-                        handleAsciiResult(message.data as Ascii);
-                        break;
+                if (message.type === MessageType.ASCII_RESULT) {
+                    handleAsciiResult(message.data as Ascii);
                 }
             };
             workers.push(worker);
@@ -68,16 +57,7 @@ function adjustWorkersPool(threads: number) {
     }
 }
 
-async function handleImageContentResult(imageContentResult: ImageContentResult) {
-    const state = processingStates.get(imageContentResult.id);
-    if (!state) {
-        return;
-    }
-    state.imageContentResult = imageContentResult;
-    if (!imageContentResult.imageContent) {
-        return;
-    }
-    const imageContent = imageContentResult.imageContent;
+async function convertToAscii(imageContent: ImageContent) {
 
     const glyphInfo = await getGlyphInfo();
 
@@ -111,7 +91,7 @@ async function handleImageContentResult(imageContentResult: ImageContentResult) 
         const id = workerIndex.toString();
         const worker = workers[workerIndex];
         asciiWorkers.set(id, worker);
-        worker.postMessage(new Message(MessageType.CONVERT_TO_ASCII, new AsciiTask(id, imageContentResult.id, off,
+        worker.postMessage(new Message(MessageType.CONVERT_TO_ASCII, new AsciiTask(id, imageContent.id, off,
                 imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX, marginY,
                 options.color)));
     });
@@ -128,22 +108,16 @@ function handleAsciiResult(ascii: Ascii) {
     }
 
     for (let i = processingIds.length - 1; i >= 0; --i) {
-        const s = processingStates.get(processingIds[i]);
-        if (!(s && s.imageContentResult)) {
-            return;
-        }
-        if (!s.imageContentResult.imageContent) {
-            continue;
-        }
-        if (s.partitions > 0) {
+        const state = processingStates.get(processingIds[i]);
+        if (!state || state.partitions > 0) {
             return;
         }
     }
 
     const result = new Array<Ascii | null>(processingIds.length);
     for (let i = processingIds.length - 1; i >= 0; --i) {
-        const s = processingStates.get(processingIds[i]);
-        result[i] = s ? s.ascii : null;
+        const state = processingStates.get(processingIds[i]);
+        result[i] = state ? state.ascii : null;
     }
 
     console.log('FINISHED!!!!');
@@ -151,32 +125,15 @@ function handleAsciiResult(ascii: Ascii) {
 
 function cancelAll() {
     processingIds.length = 0;
-
-    processingStates.forEach((value, id) => value.worker.postMessage(
-            new Message(MessageType.CANCEL_EXTRACT_IMAGE_CONTENT, id)));
+    processingStates.forEach((state, id) => state.worker.postMessage(new Message(MessageType.CANCEL_CONVERT_TO_ASCII, id)));
     processingStates.clear();
-
-    asciiWorkers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL_CONVERT_TO_ASCII, id)));
-    asciiWorkers.clear();
-}
-
-function postImageTasks() {
-    options.imageItems.forEach(imageItem => {
-        workerIndex = (workerIndex + 1) % workers.length;
-        const id = workerIndex.toString();
-        const worker = workers[workerIndex];
-        processingIds.push(id);
-        processingStates.set(id, new ProcessingState(worker));
-        worker.postMessage(new Message(MessageType.EXTRACT_IMAGE_CONTENT, new ImageTask(id, imageItem, options.palette,
-                options.colors, options.darkness)));
-    });
 }
 
 export function convert(convertOptions: ConvertOptions) {
     cancelAll();
     options = convertOptions;
     adjustWorkersPool(options.threads);
-    postImageTasks();
+
 }
 
 
