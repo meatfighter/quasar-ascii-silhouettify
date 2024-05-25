@@ -29,7 +29,8 @@ let scale = DEFAULT_SCALE;
 let darkness = DEFAULT_DARKNESS;
 let color = !DEFAULT_MONOCHROME;
 
-class AsciiResult {
+class ImageState {
+    imageContent: ImageContent | null = null;
     ascii: Ascii | null = null;
     workers = new Map<string, Worker>();
 }
@@ -41,24 +42,32 @@ let workerIndex = 0;
 
 let callback: ConvertCallback;
 
-let imageContents = new Map<string, ImageContent>();
+let imageStates = new Map<string, ImageState>();
 
-function refreshImageContents() {
-    imageContents.clear();
-    imageItems.forEach(imageItem => imageContents.set(imageItem.id,
-            makeImageContent(imageItem.imageData, palette, colors, darkness)));
+function refreshImageStates() {
+    imageStates.clear();
+    imageItems.forEach(imageItem => {
+        const imageState = new ImageState();
+        imageState.imageContent = makeImageContent(imageItem.imageData, palette, colors, darkness);
+        imageStates.set(imageItem.id, imageState);
+    });
 }
 
 export function onImageItems(imgItems: ImageItem[]) {
     imageItems = imgItems;
 
-    const imgContents = new Map<string, ImageContent>();
+    const imgStates = new Map<string, ImageState>();
     imageItems.forEach(imageItem => {
-        const imageContent = imageContents.get(imageItem.id);
-        imgContents.set(imageItem.id, imageContent ? imageContent
-                : makeImageContent(imageItem.imageData, palette, colors, darkness));
+        let imageState = imageStates.get(imageItem.id);
+        if (imageState) {
+            imgStates.set(imageItem.id, imageState);
+        } else {
+            imageState = new ImageState();
+            imageState.imageContent = makeImageContent(imageItem.imageData, palette, colors, darkness);
+            imgStates.set(imageItem.id, imageState);
+        }
     });
-    imageContents = imgContents;
+    imageStates = imgStates;
 }
 
 export function onFormat(fmt: Format) {
@@ -67,12 +76,12 @@ export function onFormat(fmt: Format) {
 
 export function onPalette(pal: Palette) {
     palette = pal;
-    refreshImageContents();
+    refreshImageStates();
 }
 
 export function onColors(cols: number) {
     colors = cols;
-    refreshImageContents();
+    refreshImageStates();
 }
 
 export function onFontSize(fntSze: number) {
@@ -89,7 +98,7 @@ export function onScale(scl: number) {
 
 export function onDarkness(drknss: number) {
     darkness = drknss;
-    refreshImageContents();
+    refreshImageStates();
 }
 
 export function onThreads(threads: number) {

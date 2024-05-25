@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { ImageItem, makeImageItemFromFile, makeImageItemFromUrl } from 'src/types/imageItem';
+import { onImageItems } from 'src/app/converter';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
     const imageList = ref<ImageItem[]>([]);
+    watch(imageList, () => onImageItems(imageList.value));
 
     function removeImage(id: string) {
         const index = imageList.value.findIndex(item => item.id === id);
