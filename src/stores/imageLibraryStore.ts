@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import ImageItem from 'src/types/imageItem';
-import { convert, ConvertOptions } from 'src/app/converter';
-import { Format } from 'src/app/format';
-import { Palette } from 'src/app/colors';
+import { loadImageData } from 'src/utils/images';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
 
@@ -14,16 +12,18 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
 
     let idSequence = 0;
 
-    function addImage(displayName: string, blobUrl: string) {
-        console.log(`Adding blob URL: ${blobUrl}`); // TODO TESTING REMOVE
-        imageList.value.push({
-            id: idSequence.toString(),
-            displayName,
-            blobUrl,
-        });
-        ++idSequence;
+    function addImage(blobUrl: string, displayName?: string) {
+        loadImageData(blobUrl, displayName).then((imageData) => {
+            imageList.value.push({
+                id: idSequence.toString(),
+                imageData,
+                blobUrl,
+                displayName: displayName || 'unknown',
+            });
+            ++idSequence;
+        })
 
-        convert(new ConvertOptions([], Format.HTML, Palette.EXTENDED_240, 255, 12, 1.2, 1, 10, 12, true));
+
     }
 
     function removeImage(id: string) {
@@ -36,13 +36,13 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
         imageList.value.splice(index, 1);
     }
 
-    function addImageFromFile(file: File | null | undefined) {
+    async function addImageFromFile(file?: File) {
         if (file) {
-            addImage(file.name, URL.createObjectURL(file));
+            await addImage(URL.createObjectURL(file), file.name);
         }
     }
 
-    async function addImageFromUrl(url: string) {
+    async function addImageFromUrl(url?: string) {
         if (!url) {
             return;
         }
@@ -51,14 +51,12 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
             try {
                 const response = await fetch(url);
                 if (response.ok) {
-                    addImage(url.split('/').pop() || url,
-                            URL.createObjectURL(await response.blob()));
+                    addImage(URL.createObjectURL(await response.blob()), url.split('/').pop() || url);
                     return;
                 }
             } catch {
             }
-            await new Promise(resolve => setTimeout(resolve,
-                    DOWNLOAD_RETRY_DELAY_MILLIS));
+            await new Promise(resolve => setTimeout(resolve, DOWNLOAD_RETRY_DELAY_MILLIS));
         }
 
         throw new Error(`Error downloading ${url}`);

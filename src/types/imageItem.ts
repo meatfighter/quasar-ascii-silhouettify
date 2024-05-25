@@ -1,5 +1,6 @@
 export default interface ImageItem {
     id: string;
-    displayName: string;
+    imageData: ImageData;
     blobUrl: string;
+    displayName: string;
 }

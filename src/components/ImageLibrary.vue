@@ -4,10 +4,6 @@ import { MoveEvent } from 'sortablejs';
 import { useImageLibraryStore } from 'stores/imageLibraryStore';
 import { storeToRefs } from 'pinia';
 import ImageLibraryToolbar from 'components/ImageLibraryToolbar.vue';
-import ImageItem from 'src/types/imageItem';
-import { useQuasar } from 'quasar';
-
-const $q = useQuasar();
 
 const imageLibraryStore = useImageLibraryStore();
 const { imageList } = storeToRefs(imageLibraryStore);
@@ -19,21 +15,6 @@ function onDragStart(event: MoveEvent) {
 
 function onDragEnd(event: MoveEvent) {
   console.log('drag end:', imageList.value, event);
-}
-
-function onLoadEnd(element: ImageItem, index: number) {
-  console.log('load end:', element, index);
-}
-
-function onLoadError(element: ImageItem, index: number) {
-  console.log('load error:', element, index);
-  removeImage(element.id);
-  $q.notify({
-    type: 'negative',
-    message: `Error loading image ${element.displayName}`,
-    position: 'bottom',
-    closeBtn: true,
-  });
 }
 
 </script>
@@ -51,8 +32,6 @@ function onLoadError(element: ImageItem, index: number) {
           <div class="thumbnail">
             <img
               :src="element.blobUrl"
-              @load="onLoadEnd(element, index)"
-              @error="onLoadError(element, index)"
               alt="Thumbnail"
               style="width: 100px; height: auto;">
             <button @click="removeImage(element.id)" class="remove-btn">&times;</button>

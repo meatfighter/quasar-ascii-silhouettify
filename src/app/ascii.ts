@@ -3,8 +3,8 @@ import { EOL, getGlyphInfo } from 'src/app/glyphs';
 import { getEOL } from 'src/utils/os';
 
 export class Ascii {
-    constructor(public id: string,
-                public processingId: string,
+    constructor(public imageIndex: number,
+                public id: string,
                 public coloredGlyphs: ColoredGlyphs[],
                 public matched: number) {
     }

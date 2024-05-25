@@ -1,4 +1,4 @@
-import { loadImageData } from 'src/app/imageProcessor';
+import { loadImageData } from 'src/utils/images';
 
 const GLYPHS_IMAGE_FILENAME = 'assets/glyphs.png';
 

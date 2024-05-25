@@ -1,7 +1,7 @@
 import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong, Palette } from 'src/app/colors';
 
 export class ImageContent {
-    constructor(public indices: Uint8Array, public width: number, public height: number, public indexSet: number[]) {
+    constructor(public indices: Uint8Array, public width: number, public height: number) {
     }
 }
 
@@ -45,7 +45,7 @@ export function extractImageContent(imageData: ImageData, palette: Palette, colo
     }
 
     if (indexSet.length <= colors) {
-        return new ImageContent(indices, imageData.width, imageData.height, indexSet);
+        return new ImageContent(indices, imageData.width, imageData.height);
     }
 
     indexSet.length = colors;
@@ -55,5 +55,5 @@ export function extractImageContent(imageData: ImageData, palette: Palette, colo
     }
     clearClosestColorCache();
 
-    return new ImageContent(indices, imageData.width, imageData.height, indexSet);
+    return new ImageContent(indices, imageData.width, imageData.height);
 }
