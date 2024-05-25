@@ -1,4 +1,5 @@
 import chroma from 'chroma-js';
+import { Palette } from 'src/types/palette';
 
 const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAAAAAABfAACHAACvAADXAAD/AF8AAF9fAF+HAF+' +
     'vAF/XAF//AIcAAIdfAIeHAIevAIfXAIf/AK8AAK9fAK+HAK+vAK/XAK//ANcAANdfANeHANevANfXANf/AP8AAP9fAP+HAP+vAP/XAP//XwAAXwB' +
@@ -12,13 +13,6 @@ const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAA
     'yvLy8xsbG0NDQ2tra5OTk7u7u';
 
 const buffer = atob(RGBS);
-
-export enum Palette {
-    STANDARD_8,
-    STANDARD_16,
-    EXTENDED_240,
-    EXTENDED_256,
-}
 
 const palette = new Array<number[]>(256);
 

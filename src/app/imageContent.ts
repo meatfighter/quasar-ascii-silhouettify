@@ -1,4 +1,5 @@
-import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong, Palette } from 'src/app/colors';
+import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong } from 'src/app/colors';
+import { Palette } from 'src/types/palette';
 
 export class ImageContent {
     constructor(public indices: Uint8Array, public width: number, public height: number) {

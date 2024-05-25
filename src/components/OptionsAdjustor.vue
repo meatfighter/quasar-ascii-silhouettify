@@ -1,100 +1,47 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { clamp } from 'src/utils/numbers';
+import {
+  COLORS_STEP,
+  DARKNESS_STEP,
+  FONT_SIZE_STEP,
+  FORMAT_OPTIONS, LINE_HEIGHT_STEP,
+  MAX_COLORS, MAX_DARKNESS, MAX_FONT_SIZE, MAX_LINE_HEIGHT, MAX_SCALE, MAX_THREADS,
+  MIN_COLORS, MIN_DARKNESS,
+  MIN_FONT_SIZE, MIN_LINE_HEIGHT, MIN_SCALE, MIN_THREADS,
+  PALETTE_OPTIONS, SCALE_STEP, THREADS_STEP,
+  useOptionsStore
+} from 'stores/optionsStore';
+import { storeToRefs } from 'pinia';
 
-const formatOptions = [ 'text', 'HTML', 'Neofetch' ];
-const DEFAULT_FORMAT = formatOptions[0];
-const formatModel = ref(DEFAULT_FORMAT);
+  const optionsStore = useOptionsStore();
+  const { format, palette, colors, fontSize, lineHeight, scale, darkness, threads, monochrome}
+      = storeToRefs(optionsStore);
+  const { reset } = optionsStore;
 
-const paletteOptions = [ '8', '16', '240', '256' ];
-const DEFAULT_PALETTE = paletteOptions[2];
-const paletteModel = ref(DEFAULT_PALETTE);
-
-const DEFAULT_COLORS = 255;
-const MIN_COLORS = 1;
-const MAX_COLORS = 255;
-const COLORS_STEP = 1;
-const colorsModel = ref(DEFAULT_COLORS);
-watch(colorsModel, () => colorsModel.value = clamp(colorsModel.value, MIN_COLORS, MAX_COLORS, DEFAULT_COLORS, true));
-
-const DEFAULT_FONT_SIZE = 12;
-const MIN_FONT_SIZE = 1;
-const MAX_FONT_SIZE = 100;
-const FONT_SIZE_STEP = MIN_FONT_SIZE;
-const fontSizeModel = ref(DEFAULT_FONT_SIZE);
-watch(fontSizeModel, () => fontSizeModel.value = clamp(fontSizeModel.value, MIN_FONT_SIZE, MAX_FONT_SIZE,
-    DEFAULT_FONT_SIZE));
-
-const DEFAULT_LINE_HEIGHT = 1.2;
-const MIN_LINE_HEIGHT = 0.05;
-const MAX_LINE_HEIGHT = 5;
-const LINE_HEIGHT_STEP = MIN_LINE_HEIGHT;
-const lineHeightModel = ref(DEFAULT_LINE_HEIGHT);
-watch(lineHeightModel, () => lineHeightModel.value = clamp(lineHeightModel.value, MIN_LINE_HEIGHT, MAX_LINE_HEIGHT,
-    DEFAULT_LINE_HEIGHT));
-
-const DEFAULT_SCALE = 1;
-const MIN_SCALE = 0.1;
-const MAX_SCALE = 10;
-const SCALE_STEP = MIN_SCALE;
-const scaleModel = ref(DEFAULT_SCALE);
-watch(scaleModel, () => scaleModel.value = clamp(scaleModel.value, MIN_SCALE, MAX_SCALE, DEFAULT_SCALE));
-
-const DEFAULT_DARKNESS = 10;
-const MIN_DARKNESS = 0;
-const MAX_DARKNESS = 100;
-const DARKNESS_STEP = 5;
-const darknessModel = ref(DEFAULT_DARKNESS);
-watch(darknessModel, () => darknessModel.value = clamp(darknessModel.value, MIN_DARKNESS, MAX_DARKNESS,
-    DEFAULT_DARKNESS));
-
-const DEFAULT_THREADS = navigator.hardwareConcurrency || 1;
-const MIN_THREADS = 1;
-const MAX_THREADS = DEFAULT_THREADS;
-const THREADS_STEP = 1;
-const threadsModel = ref(DEFAULT_THREADS);
-watch(threadsModel, () => threadsModel.value = clamp(threadsModel.value, MIN_THREADS, MAX_THREADS, DEFAULT_THREADS,
-    true));
-
-const DEFAULT_MONOCHROME = false;
-const monochromeModel = ref(DEFAULT_MONOCHROME);
-
-function defaultsClicked() {
-  formatModel.value = DEFAULT_FORMAT;
-  paletteModel.value = DEFAULT_PALETTE;
-  colorsModel.value = DEFAULT_COLORS;
-  fontSizeModel.value = DEFAULT_FONT_SIZE;
-  lineHeightModel.value = DEFAULT_LINE_HEIGHT;
-  scaleModel.value = DEFAULT_SCALE;
-  darknessModel.value = DEFAULT_DARKNESS;
-  threadsModel.value = DEFAULT_THREADS;
-  monochromeModel.value = DEFAULT_MONOCHROME;
-}
 </script>
 
 <template>
     <q-scroll-area class="full-height-scroll-area">
-      <q-select v-model="formatModel" :options="formatOptions" label="Format" filled/>
-      <q-select v-model="paletteModel" :options="paletteOptions" label="Palette" filled/>
-      <q-input label="Colors" v-model.number="colorsModel" type="number" filled :min="MIN_COLORS" :max="MAX_COLORS"
+      <q-select v-model="format" :options="FORMAT_OPTIONS" label="Format" filled/>
+      <q-select v-model="palette" :options="PALETTE_OPTIONS" label="Palette" filled/>
+      <q-input label="Colors" v-model.number="colors" type="number" filled :min="MIN_COLORS" :max="MAX_COLORS"
                :step="COLORS_STEP"/>
-      <q-input label="Font Size" v-model.number="fontSizeModel" type="number" filled :min="MIN_FONT_SIZE"
+      <q-input label="Font Size" v-model.number="fontSize" type="number" filled :min="MIN_FONT_SIZE"
                :max="MAX_FONT_SIZE" :step="FONT_SIZE_STEP"/>
-      <q-input label="Line Height" v-model.number="lineHeightModel" type="number" filled :min="MIN_LINE_HEIGHT"
+      <q-input label="Line Height" v-model.number="lineHeight" type="number" filled :min="MIN_LINE_HEIGHT"
                :max="MAX_LINE_HEIGHT" :step="LINE_HEIGHT_STEP"/>
-      <q-input label="Scale" v-model.number="scaleModel" type="number" filled :min="MIN_SCALE" :max="MAX_SCALE"
+      <q-input label="Scale" v-model.number="scale" type="number" filled :min="MIN_SCALE" :max="MAX_SCALE"
                :step="SCALE_STEP"/>
-      <q-input label="Darkness" v-model.number="darknessModel" type="number" filled :min="MIN_DARKNESS"
+      <q-input label="Darkness" v-model.number="darkness" type="number" filled :min="MIN_DARKNESS"
                :max="MAX_DARKNESS" :step="DARKNESS_STEP"/>
-      <q-input label="Threads" v-model.number="threadsModel" type="number" filled :min="MIN_THREADS" :max="MAX_THREADS"
+      <q-input label="Threads" v-model.number="threads" type="number" filled :min="MIN_THREADS" :max="MAX_THREADS"
                :step="THREADS_STEP"/>
       <q-field label="Monochrome" filled stack-label>
         <template v-slot:control>
-          <q-toggle v-model="monochromeModel"></q-toggle>
+          <q-toggle v-model="monochrome"></q-toggle>
         </template>
       </q-field>
       <div class="q-ma-md row justify-center">
-        <q-btn label="Defaults" rounded no-caps color="primary" @click="defaultsClicked()"/>
+        <q-btn label="Defaults" rounded no-caps color="primary" @click="reset()"/>
       </div>
     </q-scroll-area>
 </template>
