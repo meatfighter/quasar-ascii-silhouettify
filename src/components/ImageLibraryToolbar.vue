@@ -2,9 +2,12 @@
   import { ref } from 'vue';
   import { useImageLibraryStore } from 'stores/imageLibraryStore';
   import UrlDialog from 'components/UrlDialog.vue';
+  import { useQuasar } from 'quasar';
+
+  const $q = useQuasar();
 
   const imageLibraryStore = useImageLibraryStore();
-  const { addImageFromFile } = imageLibraryStore;
+  const { addImagesFromFiles } = imageLibraryStore;
 
   const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -14,11 +17,17 @@
     fileInput.value?.click();
   }
 
-  function handleFileChange(event: Event) {
+  function onFileChange(event: Event) {
     const target = event.target as HTMLInputElement;
-    if (target.files) {
-      Array.from(target.files).forEach(file => addImageFromFile(file));
+    if (!target.files || target.files.length === 0) {
+      return;
     }
+    addImagesFromFiles(target.files).then(errorMessages => errorMessages.forEach(message => $q.notify({
+      message,
+      type: 'negative',
+      position: 'bottom',
+      closeBtn: true,
+    })));
   }
 
   function showUrlDialog() {
@@ -29,7 +38,7 @@
 <template>
   <div class="q-pa-sm q-gutter-sm row justify-center">
     <q-btn label="Add File" icon="upload_file" rounded no-caps color="primary" @click="openFileBrowser" />
-    <input type="file" ref="fileInput" @change="handleFileChange" style="display: none" multiple accept="image/*" />
+    <input type="file" ref="fileInput" @change="onFileChange" style="display: none" multiple accept="image/*" />
 
     <q-btn label="Add URL" icon="cloud_upload" rounded no-caps color="primary" @click="showUrlDialog"/>
   </div>

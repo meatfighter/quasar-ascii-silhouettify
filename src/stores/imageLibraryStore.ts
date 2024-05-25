@@ -1,30 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import ImageItem from 'src/types/imageItem';
-import { loadImageData } from 'src/utils/images';
+import { ImageItem, makeImageItemFromFile, makeImageItemFromUrl } from 'src/types/imageItem';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
-
-    const DOWNLOAD_RETRIES = 3;
-    const DOWNLOAD_RETRY_DELAY_MILLIS = 500;
-
     const imageList = ref<ImageItem[]>([]);
-
-    let idSequence = 0;
-
-    function addImage(blobUrl: string, displayName?: string) {
-        loadImageData(blobUrl, displayName).then((imageData) => {
-            imageList.value.push({
-                id: idSequence.toString(),
-                imageData,
-                blobUrl,
-                displayName: displayName || 'unknown',
-            });
-            ++idSequence;
-        })
-
-
-    }
 
     function removeImage(id: string) {
         const index = imageList.value.findIndex(item => item.id === id);
@@ -36,31 +15,27 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
         imageList.value.splice(index, 1);
     }
 
-    async function addImageFromFile(file?: File) {
-        if (file) {
-            await addImage(URL.createObjectURL(file), file.name);
+    async function addImagesFromFiles(files: FileList): Promise<string[]> {
+        const promises = new Array<Promise<ImageItem>>(files.length);
+        for (let i = files.length - 1; i >= 0; --i) {
+            promises[i] = makeImageItemFromFile(files[i]);
         }
-    }
-
-    async function addImageFromUrl(url?: string) {
-        if (!url) {
-            return;
-        }
-
-        for (let i = DOWNLOAD_RETRIES - 1; i >= 0; --i) {
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    addImage(URL.createObjectURL(await response.blob()), url.split('/').pop() || url);
-                    return;
-                }
-            } catch {
+        const errorMessages: string[] = [];
+        const imageItems: ImageItem[] = [];
+        (await Promise.allSettled(promises)).forEach(result => {
+            if (result.status === 'fulfilled') {
+                imageItems.push((result as PromiseFulfilledResult<ImageItem>).value);
+            } else {
+                errorMessages.push((result as PromiseRejectedResult).reason.message);
             }
-            await new Promise(resolve => setTimeout(resolve, DOWNLOAD_RETRY_DELAY_MILLIS));
-        }
-
-        throw new Error(`Error downloading ${url}`);
+        });
+        imageList.value.push(...imageItems);
+        return errorMessages
     }
 
-    return { imageList, removeImage, addImageFromFile, addImageFromUrl };
+    async function addImageFromUrl(url: string) {
+        imageList.value.push(await makeImageItemFromUrl(url));
+    }
+
+    return { imageList, removeImage, addImagesFromFiles, addImageFromUrl };
 });

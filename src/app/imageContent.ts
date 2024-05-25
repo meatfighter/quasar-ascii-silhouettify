@@ -15,7 +15,7 @@ export function getIndex(imageContent: ImageContent, x: number, y: number) {
     return imageContent.indices[imageContent.width * Y + X];
 }
 
-export function extractImageContent(imageData: ImageData, palette: Palette, colors: number, darkness: number) {
+export function makeImageContent(imageData: ImageData, palette: Palette, colors: number, darkness: number) {
 
     const data = imageData.data;
     const indices = new Uint8Array(imageData.width * imageData.height);

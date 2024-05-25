@@ -5,7 +5,7 @@ import { Ascii } from 'src/app/ascii';
 import Offset from 'src/app/offset';
 import partitionArray from 'src/app/array';
 import AsciiTask from 'src/app/asciiTask';
-import { ImageContent } from 'src/app/imageContent';
+import { ImageContent, makeImageContent } from 'src/app/imageContent';
 import AsciiWorker from './worker?worker';
 import { DEFAULT_PALETTE, Palette } from 'src/types/palette';
 import {
@@ -15,9 +15,11 @@ import {
     DEFAULT_LINE_HEIGHT, DEFAULT_MONOCHROME,
     DEFAULT_SCALE
 } from 'stores/optionsStore';
+import { ImageItem } from 'src/types/imageItem';
 
 export type ConvertCallback = (asciiResults: AsciiResult[]) => void;
 
+let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
 let palette = DEFAULT_PALETTE;
 let colors = DEFAULT_COLORS;
@@ -39,16 +41,38 @@ let workerIndex = 0;
 
 let callback: ConvertCallback;
 
+let imageContents = new Map<string, ImageContent>();
+
+function refreshImageContents() {
+    imageContents.clear();
+    imageItems.forEach(imageItem => imageContents.set(imageItem.id,
+            makeImageContent(imageItem.imageData, palette, colors, darkness)));
+}
+
+export function onImageItems(imgItems: ImageItem[]) {
+    imageItems = imgItems;
+
+    const imgContents = new Map<string, ImageContent>();
+    imageItems.forEach(imageItem => {
+        const imageContent = imageContents.get(imageItem.id);
+        imgContents.set(imageItem.id, imageContent ? imageContent
+                : makeImageContent(imageItem.imageData, palette, colors, darkness));
+    });
+    imageContents = imgContents;
+}
+
 export function onFormat(fmt: Format) {
     format = fmt;
 }
 
 export function onPalette(pal: Palette) {
     palette = pal;
+    refreshImageContents();
 }
 
 export function onColors(cols: number) {
     colors = cols;
+    refreshImageContents();
 }
 
 export function onFontSize(fntSze: number) {
@@ -65,6 +89,7 @@ export function onScale(scl: number) {
 
 export function onDarkness(drknss: number) {
     darkness = drknss;
+    refreshImageContents();
 }
 
 export function onThreads(threads: number) {

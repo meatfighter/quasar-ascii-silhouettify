@@ -4,9 +4,12 @@ import { useImageLibraryStore } from 'stores/imageLibraryStore';
 import OutputArea from 'components/OutputArea.vue';
 import ImagesAndOptions from 'components/ImagesAndOptions.vue';
 import MainHeader from 'components/MainHeader.vue';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
 
 const imageLibraryStore = useImageLibraryStore();
-const { addImageFromFile } = imageLibraryStore;
+const { addImagesFromFiles } = imageLibraryStore;
 
 const splitterModel = ref(420);
 
@@ -15,10 +18,15 @@ function handleDrop(event: DragEvent) {
 
   if (event.dataTransfer) {
     const files: FileList = event.dataTransfer.files;
-    if (!files.length) {
+    if (!files || files.length === 0) {
       return;
     }
-    Array.from(files).forEach(file => addImageFromFile(file));
+    addImagesFromFiles(files).then(errorMessages => errorMessages.forEach(message => $q.notify({
+      message,
+      type: 'negative',
+      position: 'bottom',
+      closeBtn: true,
+    })));
   }
 }
 </script>
