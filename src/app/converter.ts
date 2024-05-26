@@ -52,9 +52,12 @@ function requestAll() {
     });
 }
 
+function getColors(fmt: Format) {
+    return (fmt === Format.NEOFETCH) ? Math.min(6, colors) : colors;
+}
+
 function addImageState(imgStates: Map<string, ImageState>, imageItem: ImageItem) {
-    const imageState = new ImageState(makeImageContent(imageItem.imageData, palette,
-            (format === Format.NEOFETCH) ? Math.min(6, colors) : colors, darkness));
+    const imageState = new ImageState(makeImageContent(imageItem.imageData, palette, getColors(format), darkness));
     imgStates.set(imageItem.id, imageState);
     toAscii(imageItem.id, imageState);
 }
@@ -72,7 +75,7 @@ export function onImageItems(imgItems: ImageItem[]) {
 
     const imgStates = new Map<string, ImageState>();
     imageItems.forEach(imageItem => {
-        let imageState = imageStates.get(imageItem.id);
+        const imageState = imageStates.get(imageItem.id);
         if (imageState) {
             imgStates.set(imageItem.id, imageState);
         } else {
@@ -90,8 +93,11 @@ export function onImageItems(imgItems: ImageItem[]) {
 }
 
 export function onFormat(fmt: Format) {
+    const refresh = getColors(fmt) !== getColors(format);
     format = fmt;
-    refreshImageStates();
+    if (refresh) {
+        refreshImageStates();
+    }
 }
 
 export function onPalette(pal: Palette) {
@@ -204,4 +210,5 @@ function onAscii(ascii: Ascii) {
     }
 
     // DONE
+    console.log(imageStates); // TODO
 }

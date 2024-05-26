@@ -1,6 +1,6 @@
 import Offset from 'src/types/offset';
-import { ImageContent } from 'src/app/imageContent';
 import { GlyphInfo } from 'src/types/glyphInfo';
+import { ImageContent } from 'src/types/imageContent';
 
 export default class AsciiTask {
 

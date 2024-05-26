@@ -28,7 +28,7 @@ function onDragEnd(event: MoveEvent) {
     <q-scroll-area v-else class="col">
       <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
           item-key="id" class="center-horizontally">
-        <template #item="{ element, index }">
+        <template #item="{ element }">
           <div class="thumbnail">
             <img
               :src="element.blobUrl"
