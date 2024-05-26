@@ -3,8 +3,15 @@ import { getEOL } from 'src/utils/os';
 import ColoredGlyphs from 'src/types/coloredGlyphs';
 import { EOL, getGlyphInfo } from 'src/types/glyphInfo';
 
-function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
-    const { glyphs } = getGlyphInfo();
+const { glyphs } = getGlyphInfo();
+
+export function toText(coloredGlyphs: ColoredGlyphs) {
+    let text = '';
+    coloredGlyphs.glyphIndices.forEach(index => text += (index === EOL) ? getEOL() : glyphs[index].character);
+    return text;
+}
+
+export function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
     const htmlColors = getHtmlColors();
 
     let html = `<!DOCTYPE html>
@@ -48,5 +55,3 @@ function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: number,
 
     return html;
 }
-
-console.log(toHtml([], '', 0, 0)); // TODO REMOVE

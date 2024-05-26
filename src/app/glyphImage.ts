@@ -2,7 +2,7 @@ import { loadImageData } from 'src/utils/images';
 import { getGlyphInfo, GlyphInfo, setGlyphInfo } from 'src/types/glyphInfo';
 import Glyph from 'src/types/glyph';
 
-const GLYPHS_IMAGE_FILENAME = 'src/assets/glyphs.png';
+const GLYPHS_IMAGE_FILENAME = 'src/assets/images/glyphs.png';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';

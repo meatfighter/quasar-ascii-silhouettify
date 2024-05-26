@@ -20,6 +20,7 @@ import { makeImageContent } from 'src/app/imageContentManip';
 import { ImageContent } from 'src/types/imageContent';
 import Message from 'src/types/message';
 import { MessageType } from 'src/types/messageType';
+import { useAsciiStore } from 'stores/asciiStore';
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -38,6 +39,9 @@ class ImageState {
     constructor(public imageContent: ImageContent) {
     }
 }
+
+const asciiStore = useAsciiStore();
+const { setAsciis } = asciiStore;
 
 const workers: Worker[] = [];
 let workerIndex = 0;
@@ -163,8 +167,6 @@ export function onColor(clr: boolean) {
 
 function toAscii(imageStateId: string, imageState: ImageState) {
 
-    console.log('--1');
-
     const glyphInfo = getGlyphInfo();
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
     const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
@@ -217,6 +219,12 @@ function onAscii(ascii: Ascii) {
         }
     }
 
-    // DONE
-    console.log(imageStates); // TODO
+    const asciis: Ascii[] = [];
+    imageStates.forEach(imageState => {
+        if (imageState.ascii) {
+            asciis.push(imageState.ascii);
+        }
+    });
+
+    setAsciis(asciis);
 }
