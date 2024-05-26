@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { ImageItem, makeImageItemFromFile, makeImageItemFromUrl } from 'src/types/imageItem';
 import { onImageItems } from 'src/app/converter';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
     const imageList = ref<ImageItem[]>([]);
-    watch(imageList, () => onImageItems(imageList.value));
 
     function removeImage(id: string) {
         const index = imageList.value.findIndex(item => item.id === id);
@@ -15,6 +14,7 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
         const removedItem = imageList.value[index];
         URL.revokeObjectURL(removedItem.blobUrl);
         imageList.value.splice(index, 1);
+        onImageItems(imageList.value);
     }
 
     async function addImagesFromFiles(files: FileList): Promise<string[]> {
@@ -31,12 +31,16 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
                 errorMessages.push((result as PromiseRejectedResult).reason.message);
             }
         });
-        imageList.value.push(...imageItems);
-        return errorMessages
+        if (imageItems.length > 0) {
+            imageList.value.push(...imageItems);
+            onImageItems(imageList.value);
+        }
+        return errorMessages;
     }
 
     async function addImageFromUrl(url: string) {
         imageList.value.push(await makeImageItemFromUrl(url));
+        onImageItems(imageList.value);
     }
 
     return { imageList, removeImage, addImagesFromFiles, addImageFromUrl };

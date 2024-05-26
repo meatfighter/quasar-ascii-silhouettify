@@ -9,7 +9,8 @@ import {
     DEFAULT_FONT_SIZE,
     DEFAULT_LINE_HEIGHT,
     DEFAULT_MONOCHROME,
-    DEFAULT_SCALE
+    DEFAULT_SCALE,
+    DEFAULT_THREADS
 } from 'stores/optionsStore';
 import { ImageItem } from 'src/types/imageItem';
 import Ascii from 'src/types/ascii';
@@ -43,6 +44,10 @@ let workerIndex = 0;
 
 let imageStates = new Map<string, ImageState>();
 
+export function initConverter() {
+    onThreads(DEFAULT_THREADS);
+}
+
 function requestAll() {
     imageStates.forEach((imageState, imageStateId) => {
         imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)))
@@ -71,6 +76,7 @@ function refreshImageStates() {
 }
 
 export function onImageItems(imgItems: ImageItem[]) {
+
     imageItems = imgItems;
 
     const imgStates = new Map<string, ImageState>();
@@ -156,6 +162,8 @@ export function onColor(clr: boolean) {
 }
 
 function toAscii(imageStateId: string, imageState: ImageState) {
+
+    console.log('--1');
 
     const glyphInfo = getGlyphInfo();
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;

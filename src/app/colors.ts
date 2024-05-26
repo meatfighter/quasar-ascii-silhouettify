@@ -20,17 +20,22 @@ const closestColorCache = new Map<number, number>();
 
 let htmlColors: string[];
 
-export function getHtmlColors() {
-    if (!htmlColors) {
-        htmlColors = new Array<string>(256);
-        for (let i = 0, j = 0; i < palette.length; ++i) {
-            const r = buffer.charCodeAt(j++);
-            const g = buffer.charCodeAt(j++);
-            const b = buffer.charCodeAt(j++);
-            palette[i] = chroma(r, g, b).lab();
-            htmlColors[i] = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
-        }
+export function initColors() {
+    if (htmlColors) {
+        return;
     }
+
+    htmlColors = new Array<string>(256);
+    for (let i = 0, j = 0; i < palette.length; ++i) {
+        const r = buffer.charCodeAt(j++);
+        const g = buffer.charCodeAt(j++);
+        const b = buffer.charCodeAt(j++);
+        palette[i] = chroma(r, g, b).lab();
+        htmlColors[i] = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
+    }
+}
+
+export function getHtmlColors() {
     return htmlColors;
 }
 

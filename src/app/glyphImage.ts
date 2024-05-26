@@ -2,7 +2,7 @@ import { loadImageData } from 'src/utils/images';
 import { getGlyphInfo, GlyphInfo, setGlyphInfo } from 'src/types/glyphInfo';
 import Glyph from 'src/types/glyph';
 
-const GLYPHS_IMAGE_FILENAME = 'assets/glyphs.png';
+const GLYPHS_IMAGE_FILENAME = 'src/assets/glyphs.png';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
@@ -66,7 +66,7 @@ class GlyphImage {
 async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
     const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
-    const imageData = await loadImageData(GLYPHS_IMAGE_FILENAME);
+    const imageData = await loadImageData(GLYPHS_IMAGE_FILENAME, GLYPHS_IMAGE_FILENAME);
     const data = imageData.data;
 
     const width = imageData.width / PRINTABLE_ASCII.length;
@@ -79,7 +79,7 @@ async function loadGlyphs(): Promise<GlyphInfo> {
             const row = glphyPixels[j] = new Array<boolean>(width);
             const J = I + j * imageData.width;
             for (let k = row.length - 1; k >= 0; --k) {
-                row[k] = (data[J + k] !== 0);
+                row[k] = (data[(J + k) << 2] !== 0);
             }
         }
         glyphsImages[i] = new GlyphImage(PRINTABLE_ASCII[i], glphyPixels);

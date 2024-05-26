@@ -1,9 +1,9 @@
-import AsciiTask from 'src/types/asciiTask';
-import { yieldToEventThread } from 'src/utils/threads';
 import Ascii from 'src/types/ascii';
-import { EOL, SPACE } from 'src/types/glyphInfo';
+import AsciiTask from 'src/types/asciiTask';
 import ColoredGlyphs from 'src/types/coloredGlyphs';
+import { EOL, SPACE } from 'src/types/glyphInfo';
 import { getIndex } from 'src/app/imageContentManip';
+import { yieldToEventThread } from 'src/utils/threads';
 
 async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
