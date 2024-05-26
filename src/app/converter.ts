@@ -1,4 +1,4 @@
-import { GlyphInfo } from 'src/app/glyphs';
+import { getGlyphInfo, GlyphInfo } from 'src/app/glyphs';
 import { DEFAULT_FORMAT, Format } from 'src/types/format';
 import { Message, MessageType } from 'src/app/messages';
 import { Ascii } from 'src/app/ascii';
@@ -12,12 +12,17 @@ import {
     DEFAULT_COLORS,
     DEFAULT_DARKNESS,
     DEFAULT_FONT_SIZE,
-    DEFAULT_LINE_HEIGHT, DEFAULT_MONOCHROME,
+    DEFAULT_LINE_HEIGHT,
+    DEFAULT_MONOCHROME,
     DEFAULT_SCALE
 } from 'stores/optionsStore';
 import { ImageItem } from 'src/types/imageItem';
 
-export type ConvertCallback = (asciiResults: AsciiResult[]) => void;
+let glyphInfo: GlyphInfo;
+
+function setGlyphInfo(gInfo: GlyphInfo) {
+    glyphInfo = gInfo;
+}
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -30,27 +35,40 @@ let darkness = DEFAULT_DARKNESS;
 let color = !DEFAULT_MONOCHROME;
 
 class ImageState {
-    imageContent: ImageContent | null = null;
     ascii: Ascii | null = null;
     workers = new Map<string, Worker>();
-}
 
-const asciiResults: AsciiResult[] = [];
+    constructor(public imageContent: ImageContent) {
+    }
+}
 
 const workers: Worker[] = [];
 let workerIndex = 0;
 
-let callback: ConvertCallback;
-
 let imageStates = new Map<string, ImageState>();
 
-function refreshImageStates() {
-    imageStates.clear();
-    imageItems.forEach(imageItem => {
-        const imageState = new ImageState();
-        imageState.imageContent = makeImageContent(imageItem.imageData, palette, colors, darkness);
-        imageStates.set(imageItem.id, imageState);
+function requestAll() {
+    imageStates.forEach((imageState, imageStateId) => {
+        imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)))
+        imageState.workers.clear();
+        imageState.ascii = null;
+        toAscii(imageStateId, imageState);
     });
+}
+
+function addImageState(imageItem: ImageItem) {
+    const imageState = new ImageState(makeImageContent(imageItem.imageData, palette,
+            (format === Format.NEOFETCH) ? Math.min(6, colors) : colors, darkness));
+    imageStates.set(imageItem.id, imageState);
+    toAscii(imageItem.id, imageState);
+}
+
+function refreshImageStates() {
+    imageStates.forEach(imageState => imageState.workers.forEach((worker, id) =>
+            worker.postMessage(new Message(MessageType.CANCEL, id))));
+    imageStates.clear();
+
+    imageItems.forEach(imageItem => addImageState(imageItem));
 }
 
 export function onImageItems(imgItems: ImageItem[]) {
@@ -62,16 +80,22 @@ export function onImageItems(imgItems: ImageItem[]) {
         if (imageState) {
             imgStates.set(imageItem.id, imageState);
         } else {
-            imageState = new ImageState();
-            imageState.imageContent = makeImageContent(imageItem.imageData, palette, colors, darkness);
-            imgStates.set(imageItem.id, imageState);
+            addImageState(imageItem);
         }
     });
+
+    imageStates.forEach((imageState, id) => {
+        if (!imgStates.has(id)) {
+            imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)));
+        }
+    });
+
     imageStates = imgStates;
 }
 
 export function onFormat(fmt: Format) {
     format = fmt;
+    refreshImageStates();
 }
 
 export function onPalette(pal: Palette) {
@@ -86,14 +110,17 @@ export function onColors(cols: number) {
 
 export function onFontSize(fntSze: number) {
     fontSize = fntSze;
+    requestAll();
 }
 
 export function onLineHeight(lnHght: number) {
     lineHeight = lnHght;
+    requestAll();
 }
 
 export function onScale(scl: number) {
     scale = scl;
+    requestAll();
 }
 
 export function onDarkness(drknss: number) {
@@ -123,18 +150,15 @@ export function onThreads(threads: number) {
 
 export function onColor(clr: boolean) {
     color = clr;
+    requestAll();
 }
 
-function toAscii(imageContent: ImageContent, glyphInfo: GlyphInfo) {
-
-    const asciiResult = new AsciiResult();
-    const imageIndex = asciiResults.length;
-    asciiResults.push(asciiResult);
+function toAscii(imageStateId: string, imageState: ImageState) {
 
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
     const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
-    const scaledImageWidth = scale * imageContent.width;
-    const scaledImageHeight = scale * imageContent.height;
+    const scaledImageWidth = scale * imageState.imageContent.width;
+    const scaledImageHeight = scale * imageState.imageContent.height;
     const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
     const cols = Math.ceil(scaledImageWidth / scaledGlyphWidth);
     const paddedWidth = Math.ceil(cols * scaledGlyphWidth);
@@ -159,44 +183,28 @@ function toAscii(imageContent: ImageContent, glyphInfo: GlyphInfo) {
         const id = workerIndex.toString();
         const worker = workers[workerIndex];
         workerIndex = (workerIndex + 1) % workers.length;
-        asciiResult.workers.set(id, worker);
-        worker.postMessage(new Message(MessageType.CONVERT, new AsciiTask(imageIndex, id, off,
-                imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX, marginY,
-                color)));
+        imageState.workers.set(id, worker);
+        worker.postMessage(new Message(MessageType.CONVERT, new AsciiTask(imageStateId, id, off,
+                imageState.imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX,
+                marginY, color)));
     });
 }
 
 function onAscii(ascii: Ascii) {
-    if (ascii.imageIndex >= asciiResults.length) {
+    const imageState = imageStates.get(ascii.imageStateId);
+    if (!(imageState && imageState.workers.has(ascii.id))) {
         return;
     }
-    const asciiResult = asciiResults[ascii.imageIndex];
-    if (!asciiResult.workers.has(ascii.id)) {
-        return;
-    }
-    asciiResult.workers.delete(ascii.id);
-
-    if (!asciiResult.ascii || asciiResult.ascii.matched < ascii.matched) {
-        asciiResult.ascii = ascii;
+    imageState.workers.delete(ascii.id);
+    if (!imageState.ascii || imageState.ascii.matched < ascii.matched) {
+        imageState.ascii = ascii;
     }
 
-    for (let i = asciiResults.length - 1; i >= 0; --i) {
-        if (asciiResults[i].workers.size > 0) {
+    for (const imageState of imageStates.values()) {
+        if (imageState.workers.size > 0) {
             return;
         }
     }
 
-    callback(asciiResults);
-}
-
-function cancelAll() {
-    asciiResults.forEach(asciiResult => {
-        asciiResult.workers.forEach((worker, id) => {
-            worker.postMessage(new Message(MessageType.CANCEL, id));
-        });
-    });
-    asciiResults.length = 0;
-}
-
-export function convert(glyphInfo: GlyphInfo, convertCallback: ConvertCallback) {
+    // DONE
 }

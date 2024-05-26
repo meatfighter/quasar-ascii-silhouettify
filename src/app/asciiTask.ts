@@ -7,7 +7,7 @@ export default class AsciiTask {
     cancelled = false;
 
     constructor(
-        public imageIndex: number,
+        public imageStateId: string,
         public id: string,
         public offsets: Offset[],
         public image: ImageContent,
