@@ -1,11 +1,6 @@
-import { getGlyphInfo, GlyphInfo } from 'src/app/glyphs';
 import { DEFAULT_FORMAT, Format } from 'src/types/format';
-import { Message, MessageType } from 'src/app/messages';
-import { Ascii } from 'src/app/ascii';
-import Offset from 'src/app/offset';
-import partitionArray from 'src/app/array';
-import AsciiTask from 'src/app/asciiTask';
-import { ImageContent, makeImageContent } from 'src/app/imageContent';
+import Offset from 'src/types/offset';
+import AsciiTask from 'src/types/asciiTask';
 import AsciiWorker from './worker?worker';
 import { DEFAULT_PALETTE, Palette } from 'src/types/palette';
 import {
@@ -17,12 +12,13 @@ import {
     DEFAULT_SCALE
 } from 'stores/optionsStore';
 import { ImageItem } from 'src/types/imageItem';
-
-let glyphInfo: GlyphInfo;
-
-function setGlyphInfo(gInfo: GlyphInfo) {
-    glyphInfo = gInfo;
-}
+import Ascii from 'src/types/ascii';
+import { partitionArray } from 'src/utils/arrays';
+import { getGlyphInfo } from 'src/types/glyphInfo';
+import { makeImageContent } from 'src/app/imageContentManip';
+import { ImageContent } from 'src/types/imageContent';
+import Message from 'src/types/message';
+import { MessageType } from 'src/types/messageType';
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -56,10 +52,10 @@ function requestAll() {
     });
 }
 
-function addImageState(imageItem: ImageItem) {
+function addImageState(imgStates: Map<string, ImageState>, imageItem: ImageItem) {
     const imageState = new ImageState(makeImageContent(imageItem.imageData, palette,
             (format === Format.NEOFETCH) ? Math.min(6, colors) : colors, darkness));
-    imageStates.set(imageItem.id, imageState);
+    imgStates.set(imageItem.id, imageState);
     toAscii(imageItem.id, imageState);
 }
 
@@ -68,7 +64,7 @@ function refreshImageStates() {
             worker.postMessage(new Message(MessageType.CANCEL, id))));
     imageStates.clear();
 
-    imageItems.forEach(imageItem => addImageState(imageItem));
+    imageItems.forEach(imageItem => addImageState(imageStates, imageItem));
 }
 
 export function onImageItems(imgItems: ImageItem[]) {
@@ -80,7 +76,7 @@ export function onImageItems(imgItems: ImageItem[]) {
         if (imageState) {
             imgStates.set(imageItem.id, imageState);
         } else {
-            addImageState(imageItem);
+            addImageState(imgStates, imageItem);
         }
     });
 
@@ -155,6 +151,7 @@ export function onColor(clr: boolean) {
 
 function toAscii(imageStateId: string, imageState: ImageState) {
 
+    const glyphInfo = getGlyphInfo();
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
     const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
     const scaledImageWidth = scale * imageState.imageContent.width;

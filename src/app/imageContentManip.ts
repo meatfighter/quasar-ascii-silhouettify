@@ -1,10 +1,6 @@
 import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong } from 'src/app/colors';
 import { Palette } from 'src/types/palette';
-
-export class ImageContent {
-    constructor(public indices: Uint8Array, public width: number, public height: number) {
-    }
-}
+import { ImageContent } from 'src/types/imageContent';
 
 export function getIndex(imageContent: ImageContent, x: number, y: number) {
     const X = Math.round(x);

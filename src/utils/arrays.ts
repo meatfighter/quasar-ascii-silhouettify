@@ -1,4 +1,4 @@
-export default function partitionArray<T>(data: T[], numberOfPartitions: number): T[][] {
+export function partitionArray<T>(data: T[], numberOfPartitions: number): T[][] {
     const result: T[][] = [];
     const minPartitionSize = Math.floor(data.length / numberOfPartitions);
     const extraCount = data.length % numberOfPartitions;

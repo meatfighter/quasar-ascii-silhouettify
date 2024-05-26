@@ -1,12 +1,11 @@
 import { loadImageData } from 'src/utils/images';
+import { getGlyphInfo, GlyphInfo, setGlyphInfo } from 'src/types/glyphInfo';
+import Glyph from 'src/types/glyph';
 
 const GLYPHS_IMAGE_FILENAME = 'assets/glyphs.png';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
-
-export const SPACE = 0;
-export const EOL = 255;
 
 class GlyphImage {
     htmlEscapedCharacter: string;
@@ -61,23 +60,6 @@ class GlyphImage {
                 this.neofetchEscapedCharacter = character;
                 break;
         }
-    }
-}
-
-export class Glyph {
-    constructor(public character: string,
-                public htmlEscapedCharacter: string,
-                public neofetchEscapedCharacter: string,
-                public count: number) {
-    }
-}
-
-export class GlyphInfo {
-    constructor(public masks: number[][],
-                public glyphs: Glyph[],
-                public width: number,
-                public height: number,
-                public minCount: number) {
     }
 }
 
@@ -150,11 +132,9 @@ async function loadGlyphs(): Promise<GlyphInfo> {
     return new GlyphInfo(masks, glyphs, width, height, glyphs[1].count);
 }
 
-let glyphInfo: GlyphInfo;
-
-export async function getGlyphInfo() {
+export async function initGlyphInfo() {
+    const glyphInfo = getGlyphInfo();
     if (!glyphInfo) {
-        glyphInfo = await loadGlyphs();
+        setGlyphInfo(await loadGlyphs());
     }
-    return glyphInfo;
 }

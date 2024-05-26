@@ -1,27 +1,10 @@
 import { getHtmlColors } from 'src/app/colors';
-import { EOL, getGlyphInfo } from 'src/app/glyphs';
 import { getEOL } from 'src/utils/os';
+import ColoredGlyphs from 'src/types/coloredGlyphs';
+import { EOL, getGlyphInfo } from 'src/types/glyphInfo';
 
-export class Ascii {
-    constructor(public imageStateId: string,
-                public id: string,
-                public coloredGlyphs: ColoredGlyphs[],
-                public matched: number) {
-    }
-}
-
-export class ColoredGlyphs {
-
-    glyphIndices: Uint8Array;
-
-    constructor(glyphIndices: number[],
-                public colorIndex: number) {
-        this.glyphIndices = new Uint8Array(glyphIndices);
-    }
-}
-
-async function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
-    const { glyphs } = await getGlyphInfo();
+function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
+    const { glyphs } = getGlyphInfo();
     const htmlColors = getHtmlColors();
 
     let html = `<!DOCTYPE html>

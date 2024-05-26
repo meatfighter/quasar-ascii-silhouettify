@@ -1,6 +1,7 @@
-import { Message, MessageType } from 'src/app/messages';
-import AsciiTask from 'src/app/asciiTask';
+import AsciiTask from 'src/types/asciiTask';
 import { cancelTask, toAscii } from 'src/app/asciiTaskProcessor';
+import { MessageType } from 'src/types/messageType';
+import Message from 'src/types/message';
 
 self.onmessage = <T>(event: MessageEvent<Message<T>>) => {
     const message = event.data;
