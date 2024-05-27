@@ -41,7 +41,8 @@ import { storeToRefs } from 'pinia';
         </template>
       </q-field>
       <div class="q-ma-md row justify-center">
-        <q-btn label="Defaults" rounded no-caps color="primary" @click="reset()"/>
+        <q-btn icon="restart_alt" round color="primary" @click="reset()" />
+        <q-tooltip>Restore Defaults</q-tooltip>
       </div>
     </q-scroll-area>
 </template>

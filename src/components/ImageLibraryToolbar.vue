@@ -37,10 +37,21 @@
 
 <template>
   <div class="q-pa-sm q-gutter-sm row justify-center">
-    <q-btn label="Add File" icon="upload_file" rounded no-caps color="primary" @click="openFileBrowser" />
+    <div>
+      <q-btn icon="upload_file" round color="primary" @click="openFileBrowser" />
+      <q-tooltip>Add Image File(s)</q-tooltip>
+    </div>
     <input type="file" ref="fileInput" @change="onFileChange" style="display: none" multiple accept="image/*" />
 
-    <q-btn label="Add URL" icon="cloud_upload" rounded no-caps color="primary" @click="showUrlDialog"/>
+    <div>
+      <q-btn icon="cloud_upload" round color="primary" @click="showUrlDialog"/>
+      <q-tooltip>Add Image URL</q-tooltip>
+    </div>
+
+    <div>
+      <q-btn icon="delete" round color="primary" />
+      <q-tooltip>Remove All Images</q-tooltip>
+    </div>
   </div>
   <url-dialog v-model="urlDialogVisible"/>
 </template>
