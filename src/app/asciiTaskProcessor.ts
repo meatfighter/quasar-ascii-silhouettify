@@ -5,7 +5,7 @@ import { SPACE } from 'src/types/glyphInfo';
 import { getIndex } from 'src/app/imageContentManip';
 import { yieldToEventThread } from 'src/utils/threads';
 
-async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
+function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Ascii {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
@@ -58,11 +58,6 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
         // Append end-of-line
         textBlocks.push(new ColoredGlyphs(glyphIndices, 0, false, true)); // constructor copies glyphIndices
         glyphIndices.length = 0;
-
-        await yieldToEventThread();
-        if (task.cancelled) {
-            return null;
-        }
     }
 
     if (glyphIndices.length > 0) {
@@ -72,7 +67,7 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
     return new Ascii(task.imageStateId, task.id, textBlocks, matched);
 }
 
-async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
+function toColorAscii(task: AsciiTask, originX: number, originY: number): Ascii {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
@@ -183,11 +178,6 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
         // Append end-of-line
         textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
         glyphIndices.length = 0;
-
-        await yieldToEventThread();
-        if (task.cancelled) {
-            return null;
-        }
     }
 
     if (glyphIndices.length > 0) {
@@ -205,15 +195,13 @@ export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
     let ascii = new Ascii('', '', [], 0);
-    for (let i = task.offsets.length - 1; i >= 0; --i) {
+    for (let i = task.offsets.length - 1; i >= 0 && !task.cancelled; --i) {
         const offset = task.offsets[i];
-        const result = await func(task, offset.x + task.marginX, offset.y + task.marginY);
-        if (!result) {
-            break;
-        }
+        const result = func(task, offset.x + task.marginX, offset.y + task.marginY);
         if (result.matched > ascii.matched) {
             ascii = result;
         }
+        await yieldToEventThread();
     }
 
     tasks.delete(task.id);

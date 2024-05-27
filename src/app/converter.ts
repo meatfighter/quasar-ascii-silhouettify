@@ -41,7 +41,7 @@ class ImageState {
 }
 
 const asciiStore = useAsciiStore();
-const { setAsciis } = asciiStore;
+const { setAsciis, setProcessing } = asciiStore;
 
 const workers: Worker[] = [];
 let workerIndex = 0;
@@ -52,6 +52,16 @@ export function initConverter() {
     onThreads(DEFAULT_THREADS);
 }
 
+function updateProcessing() {
+    for (const imageState of imageStates.values()) {
+        if (imageState.workers.size > 0) {
+            setProcessing(true);
+            return;
+        }
+    }
+    setProcessing(false);
+}
+
 function requestAll() {
     imageStates.forEach((imageState, imageStateId) => {
         imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)))
@@ -59,6 +69,7 @@ function requestAll() {
         imageState.ascii = null;
         toAscii(imageStateId, imageState);
     });
+    updateProcessing();
 }
 
 function getColors(fmt: Format) {
@@ -69,6 +80,7 @@ function addImageState(imgStates: Map<string, ImageState>, imageItem: ImageItem)
     const imageState = new ImageState(makeImageContent(imageItem.imageData, palette, getColors(format), darkness));
     imgStates.set(imageItem.id, imageState);
     toAscii(imageItem.id, imageState);
+    updateProcessing();
 }
 
 function refreshImageStates() {
@@ -77,6 +89,8 @@ function refreshImageStates() {
     imageStates.clear();
 
     imageItems.forEach(imageItem => addImageState(imageStates, imageItem));
+
+    updateProcessing();
 }
 
 export function onImageItems(imgItems: ImageItem[]) {
@@ -84,12 +98,14 @@ export function onImageItems(imgItems: ImageItem[]) {
     imageItems = imgItems;
 
     const imgStates = new Map<string, ImageState>();
+    let added = false;
     imageItems.forEach(imageItem => {
         const imageState = imageStates.get(imageItem.id);
         if (imageState) {
             imgStates.set(imageItem.id, imageState);
         } else {
             addImageState(imgStates, imageItem);
+            added = true;
         }
     });
 
@@ -100,6 +116,12 @@ export function onImageItems(imgItems: ImageItem[]) {
     });
 
     imageStates = imgStates;
+
+    if (!added) {
+        updateAsciis();
+    }
+
+    updateProcessing();
 }
 
 export function onFormat(fmt: Format) {
@@ -203,6 +225,17 @@ function toAscii(imageStateId: string, imageState: ImageState) {
     });
 }
 
+function updateAsciis() {
+    const asciis: Ascii[] = [];
+    imageStates.forEach(imageState => {
+        if (imageState.ascii) {
+            asciis.push(imageState.ascii);
+        }
+    });
+
+    setAsciis(asciis);
+}
+
 function onAscii(ascii: Ascii) {
     const imageState = imageStates.get(ascii.imageStateId);
     if (!(imageState && imageState.workers.has(ascii.id))) {
@@ -219,12 +252,6 @@ function onAscii(ascii: Ascii) {
         }
     }
 
-    const asciis: Ascii[] = [];
-    imageStates.forEach(imageState => {
-        if (imageState.ascii) {
-            asciis.push(imageState.ascii);
-        }
-    });
-
-    setAsciis(asciis);
+    updateProcessing();
+    updateAsciis();
 }

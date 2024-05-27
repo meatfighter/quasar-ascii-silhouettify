@@ -1,21 +1,13 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
-import { MoveEvent } from 'sortablejs';
 import { useImageLibraryStore } from 'stores/imageLibraryStore';
 import { storeToRefs } from 'pinia';
 import ImageLibraryToolbar from 'components/ImageLibraryToolbar.vue';
+import { onImageItems } from 'src/app/converter';
 
 const imageLibraryStore = useImageLibraryStore();
 const { imageList } = storeToRefs(imageLibraryStore);
 const { removeImage } = imageLibraryStore;
-
-function onDragStart(event: MoveEvent) {
-  console.log('drag start: ', imageList.value, event);
-}
-
-function onDragEnd(event: MoveEvent) {
-  console.log('drag end:', imageList.value, event);
-}
 
 </script>
 
@@ -26,7 +18,7 @@ function onDragEnd(event: MoveEvent) {
       Drag images here.
     </div>
     <q-scroll-area v-else class="col">
-      <draggable v-if="imageList.length !== 0" v-model="imageList" @start="onDragStart" @end="onDragEnd"
+      <draggable v-if="imageList.length !== 0" v-model="imageList" @end="onImageItems(imageList)"
           item-key="id" class="center-horizontally">
         <template #item="{ element }">
           <div class="thumbnail">

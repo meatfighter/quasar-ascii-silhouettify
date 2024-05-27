@@ -10,31 +10,40 @@ const { glyphs } = getGlyphInfo();
 const htmlColors = getHtmlColors();
 
 const asciiStore = useAsciiStore();
-const { asciis } = storeToRefs(asciiStore);
+const { asciis, processing } = storeToRefs(asciiStore);
 
 const optionsStore = useOptionsStore();
-const { fontSize, lineHeight, monochrome } = storeToRefs(optionsStore);
-console.log(monochrome); // TODO REMOVE
+const { fontSize, lineHeight } = storeToRefs(optionsStore);
 
 function toText(coloredGlyphs: ColoredGlyphs) {
   let text = '';
   coloredGlyphs.glyphIndices.forEach(index => text += glyphs[index].character);
   return text;
 }
+
+function getStyle(coloredGlyphs: ColoredGlyphs) {
+  if (coloredGlyphs.color) {
+    return {
+      color: '#' + htmlColors[coloredGlyphs.colorIndex],
+    };
+  } else {
+    return {};
+  }
+}
 </script>
 
 <template>
-  <q-scroll-area class="full-height-scroll-area">
+  <div v-if="processing" class="flex flex-center items-center" style="width: 100%; height: 100%;">
+    <q-spinner-grid color="primary" size="5em"/>
+  </div>
+  <q-scroll-area v-else class="full-height-scroll-area">
     <p :style="{ fontSize: fontSize + 'pt', lineHeight: lineHeight }">
       <template v-for="(ascii, asciiIndex) in asciis" :key="`${asciiIndex}`">
         <template v-for="(coloredGlyphs, coloredGlyphsIndex) in ascii.coloredGlyphs"
               :key="`${asciiIndex}-${coloredGlyphsIndex}`">
-          <span v-if="coloredGlyphs.color" :style="{ color: '#' + htmlColors[coloredGlyphs.colorIndex] }">
+          <span :style="getStyle(coloredGlyphs)">
             {{ toText(coloredGlyphs) }}
           </span>
-          <div v-else>
-            {{ toText(coloredGlyphs) }}
-          </div>
           <br v-if="coloredGlyphs.endOfLine">
         </template>
       </template>
