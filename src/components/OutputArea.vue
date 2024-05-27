@@ -37,17 +37,17 @@ function getStyle(coloredGlyphs: ColoredGlyphs) {
     <q-spinner-grid color="primary" size="5em"/>
   </div>
   <q-scroll-area v-else class="full-height-scroll-area">
-    <p :style="{ fontSize: fontSize + 'pt', lineHeight: lineHeight }">
-      <template v-for="(ascii, asciiIndex) in asciis" :key="`${asciiIndex}`">
-        <template v-for="(coloredGlyphs, coloredGlyphsIndex) in ascii.coloredGlyphs"
-              :key="`${asciiIndex}-${coloredGlyphsIndex}`">
-          <span :style="getStyle(coloredGlyphs)">
-            {{ toText(coloredGlyphs) }}
-          </span>
-          <br v-if="coloredGlyphs.endOfLine">
+      <p :style="{ fontSize: fontSize + 'pt', lineHeight: lineHeight }">
+        <template v-for="(ascii, asciiIndex) in asciis" :key="`${asciiIndex}`">
+          <template v-for="(coloredGlyphs, coloredGlyphsIndex) in ascii.coloredGlyphs"
+                :key="`${asciiIndex}-${coloredGlyphsIndex}`">
+            <span :style="getStyle(coloredGlyphs)">
+              {{ toText(coloredGlyphs) }}
+            </span>
+            <br v-if="coloredGlyphs.endOfLine">
+          </template>
         </template>
-      </template>
-    </p>
+      </p>
   </q-scroll-area>
 </template>
 
@@ -69,5 +69,6 @@ p {
   font-family: 'Cascadia Code', sans-serif;
   color: #CCCCCC;
   white-space: pre;
+  text-align: center;
 }
 </style>

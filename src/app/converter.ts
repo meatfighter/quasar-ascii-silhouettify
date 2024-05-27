@@ -45,6 +45,7 @@ const { setAsciis, setProcessing } = asciiStore;
 
 const workers: Worker[] = [];
 let workerIndex = 0;
+let idSequence = 0;
 
 let imageStates = new Map<string, ImageState>();
 
@@ -64,7 +65,7 @@ function updateProcessing() {
 
 function requestAll() {
     imageStates.forEach((imageState, imageStateId) => {
-        imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)))
+        imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)));
         imageState.workers.clear();
         imageState.ascii = null;
         toAscii(imageStateId, imageState);
@@ -215,10 +216,14 @@ function toAscii(imageStateId: string, imageState: ImageState) {
     const offs = partitionArray(offsets, workers.length);
 
     offs.forEach(off => {
-        const id = workerIndex.toString();
+        const id = idSequence.toString();
+        ++idSequence;
+
         const worker = workers[workerIndex];
         workerIndex = (workerIndex + 1) % workers.length;
+
         imageState.workers.set(id, worker);
+
         worker.postMessage(new Message(MessageType.CONVERT, new AsciiTask(imageStateId, id, off,
                 imageState.imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX,
                 marginY, color)));
@@ -236,6 +241,15 @@ function updateAsciis() {
     setAsciis(asciis);
 }
 
+function isRunningWorkers() {
+    for (const imageState of imageStates.values()) {
+        if (imageState.workers.size > 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function onAscii(ascii: Ascii) {
     const imageState = imageStates.get(ascii.imageStateId);
     if (!(imageState && imageState.workers.has(ascii.id))) {
@@ -246,10 +260,8 @@ function onAscii(ascii: Ascii) {
         imageState.ascii = ascii;
     }
 
-    for (const imageState of imageStates.values()) {
-        if (imageState.workers.size > 0) {
-            return;
-        }
+    if (isRunningWorkers()) {
+        return;
     }
 
     updateProcessing();

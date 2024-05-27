@@ -5,7 +5,9 @@ import { SPACE } from 'src/types/glyphInfo';
 import { getIndex } from 'src/app/imageContentManip';
 import { yieldToEventThread } from 'src/utils/threads';
 
-function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Ascii {
+const REGIONS_PER_YIELD = 256;
+
+async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
@@ -14,9 +16,18 @@ function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): A
     const glyphIndices: number[] = [];
     let matched = 0;
     const region = new Array<number>(3);
+    let regionCounter = 0;
     for (let r = 0; r < rows; ++r) {
         const glyphOriginY = originY + rowScale * r;
         for (let c = 0; c < cols; ++c) {
+            if (++regionCounter === REGIONS_PER_YIELD) {
+                regionCounter = 0;
+                await yieldToEventThread();
+                if (task.cancelled) {
+                    return null;
+                }
+            }
+
             const glyphOriginX = originX + colScale * c;
 
             region[2] = 0x7FFFFFFF;
@@ -67,7 +78,7 @@ function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): A
     return new Ascii(task.imageStateId, task.id, textBlocks, matched);
 }
 
-function toColorAscii(task: AsciiTask, originX: number, originY: number): Ascii {
+async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
@@ -78,9 +89,18 @@ function toColorAscii(task: AsciiTask, originX: number, originY: number): Ascii 
     const glyphIndices: number[] = [];
     let lastColorIndex = -1;
     let matched = 0;
+    let regionCounter = 0;
     for (let r = 0; r < rows; ++r) {
         const glyphOriginY = originY + rowScale * r;
         for (let c = 0; c < cols; ++c) {
+            if (++regionCounter === REGIONS_PER_YIELD) {
+                regionCounter = 0;
+                await yieldToEventThread();
+                if (task.cancelled) {
+                    return null;
+                }
+            }
+
             const glyphOriginX = originX + colScale * c;
 
             // Count the number of times each color index appears in the rectangular region to be replaced by a glyph.
@@ -191,13 +211,17 @@ const tasks = new Map<string, AsciiTask>();
 
 export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
     tasks.set(task.id, task);
+    await yieldToEventThread();
 
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
-    let ascii = new Ascii('', '', [], 0);
+    let ascii = new Ascii('', '', [], -1);
     for (let i = task.offsets.length - 1; i >= 0 && !task.cancelled; --i) {
         const offset = task.offsets[i];
-        const result = func(task, offset.x + task.marginX, offset.y + task.marginY);
+        const result = await func(task, offset.x + task.marginX, offset.y + task.marginY);
+        if (!result) {
+            break;
+        }
         if (result.matched > ascii.matched) {
             ascii = result;
         }

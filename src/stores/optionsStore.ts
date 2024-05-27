@@ -95,55 +95,67 @@ export const useOptionsStore = defineStore('options', () => {
     });
 
     const colors = ref(DEFAULT_COLORS);
-    watch(colors, () => {
-        const newValue = clamp(colors.value, MIN_COLORS, MAX_COLORS, DEFAULT_COLORS, true);
-        if (colors.value !== newValue) {
+    watch(colors, (value, oldValue) => {
+        const newValue = clamp(value, MIN_COLORS, MAX_COLORS, DEFAULT_COLORS, true);
+        if (newValue !== value) {
             colors.value = newValue;
+        }
+        if (newValue !== oldValue) {
             onColors(newValue);
         }
     });
 
     const fontSize = ref(DEFAULT_FONT_SIZE);
-    watch(fontSize, () => {
-        const newValue = clamp(fontSize.value, MIN_FONT_SIZE, MAX_FONT_SIZE, DEFAULT_FONT_SIZE);
-        if (fontSize.value !== newValue) {
+    watch(fontSize, (value, oldValue) => {
+        const newValue = clamp(value, MIN_FONT_SIZE, MAX_FONT_SIZE, DEFAULT_FONT_SIZE);
+        if (newValue !== value) {
             fontSize.value = newValue;
+        }
+        if (newValue !== oldValue) {
             onFontSize(newValue);
         }
     });
 
     const lineHeight = ref(DEFAULT_LINE_HEIGHT);
-    watch(lineHeight, () => {
-        const newValue = clamp(lineHeight.value, MIN_LINE_HEIGHT, MAX_LINE_HEIGHT, DEFAULT_LINE_HEIGHT);
-        if (lineHeight.value !== newValue) {
+    watch(lineHeight, (value, oldValue) => {
+        const newValue = clamp(value, MIN_LINE_HEIGHT, MAX_LINE_HEIGHT, DEFAULT_LINE_HEIGHT);
+        if (newValue !== value) {
             lineHeight.value = newValue;
+        }
+        if (newValue !== oldValue) {
             onLineHeight(newValue);
         }
     });
 
     const scale = ref(DEFAULT_SCALE);
-    watch(scale, () => {
-        const newValue = clamp(scale.value, MIN_SCALE, MAX_SCALE, DEFAULT_SCALE);
-        if (scale.value !== newValue) {
+    watch(scale, (value, oldValue) => {
+        const newValue = clamp(value, MIN_SCALE, MAX_SCALE, DEFAULT_SCALE);
+        if (newValue !== value) {
             scale.value = newValue;
+        }
+        if (newValue !== oldValue) {
             onScale(newValue);
         }
     });
 
     const darkness = ref(DEFAULT_DARKNESS);
-    watch(darkness, () => {
-        const newValue = clamp(darkness.value, MIN_DARKNESS, MAX_DARKNESS, DEFAULT_DARKNESS);
-        if (darkness.value !== newValue) {
+    watch(darkness, (value, oldValue) => {
+        const newValue = clamp(value, MIN_DARKNESS, MAX_DARKNESS, DEFAULT_DARKNESS);
+        if (newValue !== value) {
             darkness.value = newValue;
+        }
+        if (newValue !== oldValue) {
             onDarkness(newValue);
         }
     });
 
     const threads = ref(DEFAULT_THREADS);
-    watch(threads, () => {
-        const newValue = clamp(threads.value, MIN_THREADS, MAX_THREADS, DEFAULT_THREADS, true);
-        if (threads.value !== newValue) {
+    watch(threads, (value, oldValue) => {
+        const newValue = clamp(value, MIN_THREADS, MAX_THREADS, DEFAULT_THREADS, true);
+        if (newValue !== value) {
             threads.value = newValue;
+        }
+        if (newValue !== oldValue) {
             onThreads(threads.value);
         }
     });
