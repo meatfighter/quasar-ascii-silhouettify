@@ -2,9 +2,11 @@
 import { useAsciiStore } from 'stores/asciiStore';
 import { storeToRefs } from 'pinia';
 import { useOptionsStore } from 'stores/optionsStore';
-import { toText } from '../app/formatter';
 import { getHtmlColors } from 'src/app/colors';
+import ColoredGlyphs from 'src/types/coloredGlyphs';
+import { getGlyphInfo } from 'src/types/glyphInfo';
 
+const { glyphs } = getGlyphInfo();
 const htmlColors = getHtmlColors();
 
 const asciiStore = useAsciiStore();
@@ -13,19 +15,30 @@ const { asciis } = storeToRefs(asciiStore);
 const optionsStore = useOptionsStore();
 const { fontSize, lineHeight, monochrome } = storeToRefs(optionsStore);
 console.log(monochrome); // TODO REMOVE
+
+function toText(coloredGlyphs: ColoredGlyphs) {
+  let text = '';
+  coloredGlyphs.glyphIndices.forEach(index => text += glyphs[index].character);
+  return text;
+}
 </script>
 
 <template>
   <q-scroll-area class="full-height-scroll-area">
-    <pre :style="{ fontSize: `${fontSize}pt`, lineHeight: `${lineHeight}` }">
+    <p :style="{ fontSize: fontSize + 'pt', lineHeight: lineHeight }">
       <template v-for="(ascii, asciiIndex) in asciis" :key="`${asciiIndex}`">
-        <span v-for="(coloredGlyph, coloredGlyphIndex) in ascii.coloredGlyphs"
-              :key="`${asciiIndex}-${coloredGlyphIndex}`"
-              :style="{ color: `#${htmlColors[Math.max(0, coloredGlyph.colorIndex)]}`}">
-         {{ toText(coloredGlyph) }}
-        </span>
+        <template v-for="(coloredGlyphs, coloredGlyphsIndex) in ascii.coloredGlyphs"
+              :key="`${asciiIndex}-${coloredGlyphsIndex}`">
+          <span v-if="coloredGlyphs.color" :style="{ color: '#' + htmlColors[coloredGlyphs.colorIndex] }">
+            {{ toText(coloredGlyphs) }}
+          </span>
+          <div v-else>
+            {{ toText(coloredGlyphs) }}
+          </div>
+          <br v-if="coloredGlyphs.endOfLine">
+        </template>
       </template>
-    </pre>
+    </p>
   </q-scroll-area>
 </template>
 
@@ -43,8 +56,9 @@ console.log(monochrome); // TODO REMOVE
   overflow: hidden;
 }
 
-pre {
+p {
   font-family: 'Cascadia Code', sans-serif;
   color: #CCCCCC;
+  white-space: pre;
 }
 </style>

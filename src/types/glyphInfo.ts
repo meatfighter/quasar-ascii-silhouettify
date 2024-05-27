@@ -1,7 +1,6 @@
 import Glyph from 'src/types/glyph';
 
 export const SPACE = 0;
-export const EOL = 255;
 
 export class GlyphInfo {
     constructor(public masks: number[][],

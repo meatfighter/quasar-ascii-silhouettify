@@ -1,7 +1,7 @@
 import Ascii from 'src/types/ascii';
 import AsciiTask from 'src/types/asciiTask';
 import ColoredGlyphs from 'src/types/coloredGlyphs';
-import { EOL, SPACE } from 'src/types/glyphInfo';
+import { SPACE } from 'src/types/glyphInfo';
 import { getIndex } from 'src/app/imageContentManip';
 import { yieldToEventThread } from 'src/utils/threads';
 
@@ -10,6 +10,7 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
 
+    const textBlocks: ColoredGlyphs[] = [];
     const glyphIndices: number[] = [];
     let matched = 0;
     const region = new Array<number>(3);
@@ -53,7 +54,10 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[glyphIndex].count;
         }
-        glyphIndices.push(EOL);
+
+        // Append end-of-line
+        textBlocks.push(new ColoredGlyphs(glyphIndices, 0, false, true)); // constructor copies glyphIndices
+        glyphIndices.length = 0;
 
         await yieldToEventThread();
         if (task.cancelled) {
@@ -61,7 +65,11 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
         }
     }
 
-    return new Ascii(task.imageStateId, task.id, [ new ColoredGlyphs(glyphIndices, -1) ], matched);
+    if (glyphIndices.length > 0) {
+        textBlocks.push(new ColoredGlyphs(glyphIndices, 0, false));
+    }
+
+    return new Ascii(task.imageStateId, task.id, textBlocks, matched);
 }
 
 async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
@@ -171,7 +179,10 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[bestGlyphIndex].count;
         }
-        glyphIndices.push(EOL);
+
+        // Append end-of-line
+        textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
+        glyphIndices.length = 0;
 
         await yieldToEventThread();
         if (task.cancelled) {
