@@ -68,7 +68,8 @@ function onDownload() {
       <q-img src="logo-white.svg" spinner-color="white" style="width: 32px; height: 32px;"/>
       <q-toolbar-title>ASCII Silhouettify</q-toolbar-title>
       <div>
-        <q-btn icon="download" round color="primary" :disable="loadingImages || processing" @click="onDownload"/>
+        <q-btn icon="download" round color="primary" :disable="loadingImages || processing || asciis.length === 0"
+               @click="onDownload"/>
         <q-tooltip>Download ASCII Silhouette</q-tooltip>
       </div>
     </q-toolbar>

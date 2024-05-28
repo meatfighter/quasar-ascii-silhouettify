@@ -183,7 +183,8 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
             if (lastColorIndex !== bestColorIndex && lastColorIndex >= 0) {
-                coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
+                coloredGlyphsArray.push(
+                        new ColoredGlyphs(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
                 glyphIndices.length = 0;
             }
             lastColorIndex = bestColorIndex;
@@ -196,7 +197,8 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
         }
 
         // Append end-of-line
-        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
+        coloredGlyphsArray.push(
+                new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
         glyphIndices.length = 0;
     }
 
