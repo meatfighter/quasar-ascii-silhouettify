@@ -5,6 +5,12 @@ import { onImageItems } from 'src/app/converter';
 
 export const useImageLibraryStore = defineStore('imageLibrary', () => {
     const imageList = ref<ImageItem[]>([]);
+    const loadingImages = ref(false);
+
+    function removeAll() {
+        imageList.value.length = 0;
+        onImageItems(imageList.value);
+    }
 
     function removeImage(id: string) {
         const index = imageList.value.findIndex(item => item.id === id);
@@ -18,6 +24,7 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
     }
 
     async function addImagesFromFiles(files: FileList): Promise<string[]> {
+        loadingImages.value = true;
         const promises = new Array<Promise<ImageItem>>(files.length);
         for (let i = files.length - 1; i >= 0; --i) {
             promises[i] = makeImageItemFromFile(files[i]);
@@ -35,6 +42,7 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
             imageList.value.push(...imageItems);
             onImageItems(imageList.value);
         }
+        loadingImages.value = false;
         return errorMessages;
     }
 
@@ -43,5 +51,5 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
         onImageItems(imageList.value);
     }
 
-    return { imageList, removeImage, addImagesFromFiles, addImageFromUrl };
+    return { imageList, removeImage, addImagesFromFiles, addImageFromUrl, removeAll, loadingImages };
 });

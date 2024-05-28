@@ -12,7 +12,7 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
 
-    const textBlocks: ColoredGlyphs[] = [];
+    const coloredGlyphsArray: ColoredGlyphs[] = [];
     const glyphIndices: number[] = [];
     let matched = 0;
     const region = new Array<number>(3);
@@ -67,15 +67,15 @@ async function toMonochromeAscii(task: AsciiTask, originX: number, originY: numb
         }
 
         // Append end-of-line
-        textBlocks.push(new ColoredGlyphs(glyphIndices, 0, false, true)); // constructor copies glyphIndices
+        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, 0, false, true)); // constructor copies glyphIndices
         glyphIndices.length = 0;
     }
 
     if (glyphIndices.length > 0) {
-        textBlocks.push(new ColoredGlyphs(glyphIndices, 0, false));
+        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, 0, false));
     }
 
-    return new Ascii(task.imageStateId, task.id, textBlocks, matched);
+    return new Ascii(task.imageStateId, task.id, coloredGlyphsArray, matched);
 }
 
 async function toColorAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
@@ -85,7 +85,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
-    const textBlocks: ColoredGlyphs[] = [];
+    const coloredGlyphsArray: ColoredGlyphs[] = [];
     const glyphIndices: number[] = [];
     let lastColorIndex = -1;
     let matched = 0;
@@ -183,7 +183,7 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
             if (lastColorIndex !== bestColorIndex && lastColorIndex >= 0) {
-                textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
+                coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex)); // constructor copies glyphIndices
                 glyphIndices.length = 0;
             }
             lastColorIndex = bestColorIndex;
@@ -196,15 +196,15 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
         }
 
         // Append end-of-line
-        textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
+        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
         glyphIndices.length = 0;
     }
 
     if (glyphIndices.length > 0) {
-        textBlocks.push(new ColoredGlyphs(glyphIndices, lastColorIndex));
+        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex));
     }
 
-    return new Ascii(task.imageStateId, task.id, textBlocks, matched);
+    return new Ascii(task.imageStateId, task.id, coloredGlyphsArray, matched);
 }
 
 const tasks = new Map<string, AsciiTask>();
@@ -215,14 +215,14 @@ export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
 
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
-    let ascii = new Ascii('', '', [], -1);
+    let ascii: Ascii | null = null;
     for (let i = task.offsets.length - 1; i >= 0 && !task.cancelled; --i) {
         const offset = task.offsets[i];
         const result = await func(task, offset.x + task.marginX, offset.y + task.marginY);
         if (!result) {
             break;
         }
-        if (result.matched > ascii.matched) {
+        if (!ascii || result.matched > ascii.matched) {
             ascii = result;
         }
         await yieldToEventThread();

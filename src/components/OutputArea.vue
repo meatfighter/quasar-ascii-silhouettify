@@ -33,13 +33,13 @@ function getStyle(coloredGlyphs: ColoredGlyphs) {
 </script>
 
 <template>
-  <div v-if="processing" class="flex flex-center items-center" style="width: 100%; height: 100%;">
+  <div v-if="processing" class="flex flex-center items-center" style="width: 100%; height: 100%; background: #0C0C0C;">
     <q-spinner-grid color="primary" size="5em"/>
   </div>
   <q-scroll-area v-else class="full-height-scroll-area">
       <p :style="{ fontSize: fontSize + 'pt', lineHeight: lineHeight }">
         <template v-for="(ascii, asciiIndex) in asciis" :key="`${asciiIndex}`">
-          <template v-for="(coloredGlyphs, coloredGlyphsIndex) in ascii.coloredGlyphs"
+          <template v-for="(coloredGlyphs, coloredGlyphsIndex) in ascii.coloredGlyphsArray"
                 :key="`${asciiIndex}-${coloredGlyphsIndex}`">
             <span :style="getStyle(coloredGlyphs)">
               {{ toText(coloredGlyphs) }}

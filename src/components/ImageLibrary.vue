@@ -6,7 +6,7 @@ import ImageLibraryToolbar from 'components/ImageLibraryToolbar.vue';
 import { onImageItems } from 'src/app/converter';
 
 const imageLibraryStore = useImageLibraryStore();
-const { imageList } = storeToRefs(imageLibraryStore);
+const { imageList, loadingImages } = storeToRefs(imageLibraryStore);
 const { removeImage } = imageLibraryStore;
 
 </script>
@@ -14,7 +14,10 @@ const { removeImage } = imageLibraryStore;
 <template>
   <div class="full-height-scroll-area column">
     <image-library-toolbar/>
-    <div v-if="imageList.length === 0" class="col empty-box">
+    <div v-if="loadingImages" class="col spinner-box">
+      <q-spinner color="primary" size="3em"/>
+    </div>
+    <div v-else-if="imageList.length === 0" class="col empty-box">
       Drag images here.
     </div>
     <q-scroll-area v-else class="col">
@@ -31,10 +34,10 @@ const { removeImage } = imageLibraryStore;
         </template>
       </draggable>
       <div v-if="imageList.length === 1" class="message-bottom">
-        Drag another image here.
+        Drag more images here.
       </div>
       <div v-else class="message-bottom">
-        Drag to reorder images or to add more images here.
+        Rearrange images by dragging.<br>Or drag more images here.
       </div>
     </q-scroll-area>
   </div>
@@ -43,6 +46,13 @@ const { removeImage } = imageLibraryStore;
 <style scoped>
 .full-height-scroll-area {
   height: 100%;
+  background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
+}
+
+.spinner-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: linear-gradient(to right, #15181B 0px, #15181B calc(100% - 8px), #0F1316 100%);
 }
 

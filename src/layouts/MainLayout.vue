@@ -5,6 +5,7 @@ import OutputArea from 'components/OutputArea.vue';
 import ImagesAndOptions from 'components/ImagesAndOptions.vue';
 import MainHeader from 'components/MainHeader.vue';
 import { useQuasar } from 'quasar';
+import MainFooter from 'components/MainFooter.vue';
 
 const $q = useQuasar();
 
@@ -13,7 +14,7 @@ const { addImagesFromFiles } = imageLibraryStore;
 
 const splitterModel = ref(420);
 
-function handleDrop(event: DragEvent) {
+function onDrop(event: DragEvent) {
   event.preventDefault();
 
   if (event.dataTransfer) {
@@ -29,12 +30,18 @@ function handleDrop(event: DragEvent) {
     })));
   }
 }
+
+function onDragEnd(event: DragEvent) {
+  event.preventDefault();
+
+  console.log('--1');
+}
 </script>
 
 <template>
   <q-layout view="hHh lpr fFf">
 
-    <div @drop.prevent="handleDrop" @dragover.prevent @dragenter.prevent>
+    <div @drop.prevent="onDrop" @dragend="onDragEnd" @dragover.prevent @dragenter.prevent>
       <main-header/>
 
       <q-page-container>
@@ -50,16 +57,7 @@ function handleDrop(event: DragEvent) {
         </q-page>
       </q-page-container>
 
-      <q-footer style="background: #1F1F1F; color: white;">
-        <q-toolbar>
-          <q-toolbar-title>
-            <q-avatar>
-              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" alt="logo">
-            </q-avatar>
-            Title
-          </q-toolbar-title>
-        </q-toolbar>
-      </q-footer>
+      <main-footer/>
     </div>
   </q-layout>
 </template>

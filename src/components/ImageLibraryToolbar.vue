@@ -7,7 +7,7 @@
   const $q = useQuasar();
 
   const imageLibraryStore = useImageLibraryStore();
-  const { addImagesFromFiles } = imageLibraryStore;
+  const { addImagesFromFiles, removeAll } = imageLibraryStore;
 
   const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -49,7 +49,7 @@
     </div>
 
     <div>
-      <q-btn icon="delete" round color="primary" />
+      <q-btn icon="delete" round color="primary" @click="removeAll"/>
       <q-tooltip>Remove All Images</q-tooltip>
     </div>
   </div>

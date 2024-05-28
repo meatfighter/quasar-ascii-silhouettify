@@ -1,10 +1,11 @@
 import { getHtmlColors } from 'src/app/colors';
 import ColoredGlyphs from 'src/types/coloredGlyphs';
 import { getGlyphInfo } from 'src/types/glyphInfo';
+import { getEOL } from 'src/utils/os';
 
 const { glyphs } = getGlyphInfo();
 
-export function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
+export function toHtml(coloredGlyphsArray: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
     const htmlColors = getHtmlColors();
 
     let html = `<!DOCTYPE html>
@@ -32,15 +33,20 @@ export function toHtml(coloredGlyphs: ColoredGlyphs[], title: string, fontSize: 
 <body>
     <pre>`;
 
-    coloredGlyphs.forEach(segment => {
-        if (segment.colorIndex >= 0) {
-            html += `<span style="color: #${htmlColors[segment.colorIndex]};">`;
+    for (let i = 0; i < coloredGlyphsArray.length; ++i) {
+        const coloredGlyphs = coloredGlyphsArray[i];
+        if (coloredGlyphs.color && (i === 0 || coloredGlyphsArray[i - 1].colorIndex !== coloredGlyphs.colorIndex)) {
+            html += `<span style="color: #${htmlColors[coloredGlyphs.colorIndex]};">`;
         }
-        segment.glyphIndices.forEach(index => html += glyphs[index].htmlEscapedCharacter);
-        if (segment.colorIndex >= 0) {
+        coloredGlyphs.glyphIndices.forEach(index => html += glyphs[index].htmlEscapedCharacter);
+        if (coloredGlyphs.endOfLine) {
+            html += getEOL();
+        }
+        if (coloredGlyphs.color && (i === coloredGlyphsArray.length - 1
+                || coloredGlyphs.colorIndex !== coloredGlyphsArray[i + 1].colorIndex)) {
             html += '</span>';
         }
-    })
+    }
 
     html += `    </pre>   
 </body>
