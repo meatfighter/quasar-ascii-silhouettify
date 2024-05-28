@@ -11,9 +11,13 @@ export const useAsciiStore = defineStore('asciiStore', () => {
         asciis.value = as;
     }
 
+    function clearAsciis() {
+        asciis.value = [];
+    }
+
     function setProcessing(value: boolean) {
         processing.value = value;
     }
 
-    return { asciis, setAsciis, processing, setProcessing };
+    return { asciis, setAsciis, processing, setProcessing, clearAsciis };
 });

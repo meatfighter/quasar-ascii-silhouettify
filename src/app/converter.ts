@@ -41,7 +41,7 @@ class ImageState {
 }
 
 const asciiStore = useAsciiStore();
-const { setAsciis, setProcessing } = asciiStore;
+const { setAsciis, clearAsciis, setProcessing } = asciiStore;
 
 const workers: Worker[] = [];
 let workerIndex = 0;
@@ -64,6 +64,7 @@ function updateProcessing() {
 }
 
 function requestAll() {
+    clearAsciis();
     imageStates.forEach((imageState, imageStateId) => {
         imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)));
         imageState.workers.clear();
@@ -85,6 +86,8 @@ function addImageState(imgStates: Map<string, ImageState>, imageItem: ImageItem)
 }
 
 function refreshImageStates() {
+    clearAsciis();
+
     imageStates.forEach(imageState => imageState.workers.forEach((worker, id) =>
             worker.postMessage(new Message(MessageType.CANCEL, id))));
     imageStates.clear();
@@ -95,6 +98,8 @@ function refreshImageStates() {
 }
 
 export function onImageItems(imgItems: ImageItem[]) {
+
+    clearAsciis();
 
     imageItems = imgItems;
 

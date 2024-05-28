@@ -32,12 +32,15 @@ function downloadReport() {
 </script>
 
 <template>
-  <q-btn
-      @click="downloadReport"
-      :disabled="!enabled"
-      color="primary"
-      unelevated
-      icon="file_download"
-      label="Download"
-  />
+  <div>
+    <q-btn
+        @click="downloadReport"
+        :disabled="!enabled"
+        color="primary"
+        unelevated
+        icon="file_download"
+        label="Download"
+    />
+    <q-tooltip>Download ASCII Silhouette</q-tooltip>
+  </div>
 </template>

@@ -15,16 +15,16 @@ import {
 import { Format } from 'src/types/format';
 import { Palette } from 'src/types/palette';
 
-const TEXT_FORMAT = 'text';
-const HTML_FORMAT = 'HTML';
-const NEOFETCH_FORMAT = 'Neofetch';
+export const TEXT_FORMAT = 'text';
+export const HTML_FORMAT = 'HTML';
+export const NEOFETCH_FORMAT = 'Neofetch';
 export const FORMAT_OPTIONS = [ TEXT_FORMAT, HTML_FORMAT, NEOFETCH_FORMAT ];
 export const DEFAULT_FORMAT = FORMAT_OPTIONS[0];
 
-const PALETTE_8 = '8';
-const PALETTE_16 = '16';
-const PALETTE_240 = '240';
-const PALETTE_256 = '256';
+export const PALETTE_8 = '8';
+export const PALETTE_16 = '16';
+export const PALETTE_240 = '240';
+export const PALETTE_256 = '256';
 export const PALETTE_OPTIONS = [ PALETTE_8, PALETTE_16, PALETTE_240, PALETTE_256 ];
 export const DEFAULT_PALETTE = PALETTE_OPTIONS[2];
 

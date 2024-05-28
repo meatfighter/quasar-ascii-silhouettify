@@ -6,7 +6,8 @@ const DOWNLOAD_RETRY_DELAY_MILLIS = 500;
 export class ImageItem {
     constructor(public id: string,
                 public blobUrl: string,
-                public imageData: ImageData) {
+                public imageData: ImageData,
+                public displayName: string) {
     }
 }
 
@@ -24,7 +25,7 @@ async function makeImageItem(displayName: string, blobUrl: string): Promise<Imag
         throw e;
     }
 
-    return new ImageItem(id, blobUrl, imageData);
+    return new ImageItem(id, blobUrl, imageData, displayName);
 }
 
 export async function makeImageItemFromFile(file: File): Promise<ImageItem> {

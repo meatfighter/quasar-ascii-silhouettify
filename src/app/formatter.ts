@@ -1,51 +1,74 @@
 import { getHtmlColors } from 'src/app/colors';
-import ColoredGlyphs from 'src/types/coloredGlyphs';
 import { getGlyphInfo } from 'src/types/glyphInfo';
+import Ascii from 'src/types/ascii';
 
 const { glyphs } = getGlyphInfo();
 
 const EOL = '\n';
+const MAX_NEOFETCH_INDICES = 6;
 
-export function toNeofetch(coloredGlyphsArray: ColoredGlyphs[]) {
+export function toNeofetch(asciis: Ascii[]) {
     let text = '';
 
-    coloredGlyphsArray.forEach(coloredGlyphs => {
-        coloredGlyphs.glyphIndices.forEach(index => {
-            
+    asciis.forEach(ascii => {
+        const coloredGlyphsArray = ascii.coloredGlyphsArray;
+        const uniqueIndices = new Set<number>();
+        coloredGlyphsArray.forEach(coloredGlyphs => {
+            if (coloredGlyphs.color) {
+                uniqueIndices.add(coloredGlyphs.colorIndex);
+            }
         });
-    });
-
-    coloredGlyphsArray.forEach(coloredGlyphs => {
-        coloredGlyphs.glyphIndices.forEach(index => {
-
-        });
-        if (coloredGlyphs.endOfLine) {
-            text += EOL;
+        const indices = Array.from(uniqueIndices).sort((a, b) => a - b);
+        if (indices.length > MAX_NEOFETCH_INDICES) {
+            throw new Error(`Found more than ${MAX_NEOFETCH_INDICES} unique color indices.`);
         }
+        const styles = new Array<string>(256);
+        for (let i = 0; i < indices.length; ++i) {
+            styles[indices[i]] = `\${c${i + 1}}`;
+        }
+
+        if (indices.length > 0) {
+            text += 'colors';
+            indices.forEach(index => text += ' ' + index);
+            text += EOL + EOL;
+        }
+
+        coloredGlyphsArray.forEach(coloredGlyphs => {
+            if (coloredGlyphs.color) {
+                text += styles[coloredGlyphs.colorIndex];
+            }
+            coloredGlyphs.glyphIndices.forEach(index => text += glyphs[index].neofetchEscapedCharacter);
+            if (coloredGlyphs.endOfLine) {
+                text += EOL;
+            }
+        });
     });
-
-
 
     return text;
 }
 
-export function toText(coloredGlyphsArray: ColoredGlyphs[], ansi16: boolean) {
+export function toText(asciis: Ascii[], ansi16: boolean) {
     let text = '';
 
-    coloredGlyphsArray.forEach(coloredGlyphs => {
-        coloredGlyphs.glyphIndices.forEach(index => {
-            if (ansi16) {
-                if (index < 8) {
-                    text += `\x1b[3${index}m`;
+    asciis.forEach(ascii => {
+        const coloredGlyphsArray = ascii.coloredGlyphsArray;
+        for (let i = 0; i < coloredGlyphsArray.length; ++i) {
+            const coloredGlyphs = coloredGlyphsArray[i];
+            if (coloredGlyphs.color && (i === 0 || coloredGlyphsArray[i - 1].colorIndex !== coloredGlyphs.colorIndex)) {
+                if (ansi16) {
+                    if (coloredGlyphs.colorIndex < 8) {
+                        text += `\x1b[3${coloredGlyphs.colorIndex}m`;
+                    } else {
+                        text += `\x1b[1;3${coloredGlyphs.colorIndex - 8}m`;
+                    }
                 } else {
-                    text += `\x1b[1;3${index - 8}m`;
+                    text += `\x1b[38;5;${coloredGlyphs.colorIndex}m`;
                 }
-            } else {
-                text += `\x1b[38;5;${index}m`;
             }
-        });
-        if (coloredGlyphs.endOfLine) {
-            text += EOL;
+            coloredGlyphs.glyphIndices.forEach(index => text += glyphs[index].character);
+            if (coloredGlyphs.endOfLine) {
+                text += EOL;
+            }
         }
     });
 
@@ -55,7 +78,7 @@ export function toText(coloredGlyphsArray: ColoredGlyphs[], ansi16: boolean) {
     return text;
 }
 
-export function toHtml(coloredGlyphsArray: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
+export function toHtml(asciis: Ascii[], title: string, fontSize: number, lineHeight: number) {
     const htmlColors = getHtmlColors();
 
     let html = `<!DOCTYPE html>
@@ -83,20 +106,23 @@ export function toHtml(coloredGlyphsArray: ColoredGlyphs[], title: string, fontS
 <body>
     <pre>`;
 
-    for (let i = 0; i < coloredGlyphsArray.length; ++i) {
-        const coloredGlyphs = coloredGlyphsArray[i];
-        if (coloredGlyphs.color && (i === 0 || coloredGlyphsArray[i - 1].colorIndex !== coloredGlyphs.colorIndex)) {
-            html += `<span style="color: #${htmlColors[coloredGlyphs.colorIndex]};">`;
+    asciis.forEach(ascii => {
+        const coloredGlyphsArray = ascii.coloredGlyphsArray;
+        for (let i = 0; i < coloredGlyphsArray.length; ++i) {
+            const coloredGlyphs = coloredGlyphsArray[i];
+            if (coloredGlyphs.color && (i === 0 || coloredGlyphsArray[i - 1].colorIndex !== coloredGlyphs.colorIndex)) {
+                html += `<span style="color: #${htmlColors[coloredGlyphs.colorIndex]};">`;
+            }
+            coloredGlyphs.glyphIndices.forEach(index => html += glyphs[index].htmlEscapedCharacter);
+            if (coloredGlyphs.endOfLine) {
+                html += EOL;
+            }
+            if (coloredGlyphs.color && (i === coloredGlyphsArray.length - 1
+                    || coloredGlyphs.colorIndex !== coloredGlyphsArray[i + 1].colorIndex)) {
+                html += '</span>';
+            }
         }
-        coloredGlyphs.glyphIndices.forEach(index => html += glyphs[index].htmlEscapedCharacter);
-        if (coloredGlyphs.endOfLine) {
-            html += EOL;
-        }
-        if (coloredGlyphs.color && (i === coloredGlyphsArray.length - 1
-                || coloredGlyphs.colorIndex !== coloredGlyphsArray[i + 1].colorIndex)) {
-            html += '</span>';
-        }
-    }
+    });
 
     html += `    </pre>   
 </body>
