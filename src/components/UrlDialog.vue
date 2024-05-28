@@ -23,19 +23,17 @@ function closeUrlDialog() {
   emit('update:modelValue', false);
 }
 
-function onDownloadStarted(url: string) {
-  console.log(`Download started: ${url}`);
-}
-
-function onDownloadEnded(url: string) {
-  console.log(`Download ended: ${url}`);
-}
-
 function addImage() {
-  const url = imageUrl.value;
-  onDownloadStarted(url);
-  addImageFromUrl(url)
-    .then(() => onDownloadEnded(url))
+  let url = imageUrl.value;
+  if (!url) {
+    return;
+  }
+  url = url.trim();
+  if (!url) {
+    return;
+  }
+
+  void addImageFromUrl(url)
     .catch((e: Error) => $q.notify({
       type: 'negative',
       message: e.message,
@@ -48,16 +46,16 @@ function addImage() {
 
 <template>
   <q-dialog :model-value="modelValue">
-    <q-card>
+    <q-card style="min-width: 50em;">
       <q-card-section>
         <div class="text-h6">Enter Image URL</div>
       </q-card-section>
       <q-card-section>
-        <q-input v-model="imageUrl" label="URL" filled />
+        <q-input v-model="imageUrl" label="URL" filled/>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="Cancel" @click="closeUrlDialog" />
-        <q-btn flat label="Add Image" @click="addImage" />
+        <q-btn flat label="Add Image" @click="addImage" :disable="!imageUrl.trim()"/>
       </q-card-actions>
     </q-card>
   </q-dialog>

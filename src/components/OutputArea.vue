@@ -52,13 +52,6 @@ function getStyle(coloredGlyphs: ColoredGlyphs) {
 </template>
 
 <style scoped>
-@font-face{
-  font-family: cascadia code;
-  font-style: normal;
-  font-weight: 400;
-  src: local('Cascadia Code'),url('./fonts/Cascadia.woff') format('woff');
-}
-
 .full-height-scroll-area {
   height: 100%;
   background: #0C0C0C;

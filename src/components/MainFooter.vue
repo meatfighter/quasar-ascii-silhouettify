@@ -5,7 +5,7 @@
 <template>
   <q-footer class="text-white" style="background: #1F1F1F;">
     <q-toolbar>
-      <div class="col justify-start text-caption" style="line-height: 6px;">
+      <div class="col justify-start text-caption">
         <div>&copy; 2024 meatfighter.com</div>
         <div>
           This content is licensed under
@@ -17,9 +17,8 @@
           </a>
         </div>
       </div>
-      <div class="justify-end text-subtitle1">
-        <a href="https://github.com/meatfighter/quasar-ascii-silhouettify">Source</a>&nbsp;|&nbsp;
-        <a href="https://meatfighter.com" target="_self">Home</a>
+      <div class="justify-end text-body1">
+        <a href="https://github.com/meatfighter/quasar-ascii-silhouettify">Source</a>&nbsp;|&nbsp;<a href="https://meatfighter.com" target="_self">Home</a>
       </div>
     </q-toolbar>
   </q-footer>

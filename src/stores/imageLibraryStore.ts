@@ -25,30 +25,38 @@ export const useImageLibraryStore = defineStore('imageLibrary', () => {
 
     async function addImagesFromFiles(files: FileList): Promise<string[]> {
         loadingImages.value = true;
-        const promises = new Array<Promise<ImageItem>>(files.length);
-        for (let i = files.length - 1; i >= 0; --i) {
-            promises[i] = makeImageItemFromFile(files[i]);
-        }
         const errorMessages: string[] = [];
-        const imageItems: ImageItem[] = [];
-        (await Promise.allSettled(promises)).forEach(result => {
-            if (result.status === 'fulfilled') {
-                imageItems.push((result as PromiseFulfilledResult<ImageItem>).value);
-            } else {
-                errorMessages.push((result as PromiseRejectedResult).reason.message);
+        try {
+            const promises = new Array<Promise<ImageItem>>(files.length);
+            for (let i = files.length - 1; i >= 0; --i) {
+                promises[i] = makeImageItemFromFile(files[i]);
             }
-        });
-        if (imageItems.length > 0) {
-            imageList.value.push(...imageItems);
-            onImageItems(imageList.value);
+            const imageItems: ImageItem[] = [];
+            (await Promise.allSettled(promises)).forEach(result => {
+                if (result.status === 'fulfilled') {
+                    imageItems.push((result as PromiseFulfilledResult<ImageItem>).value);
+                } else {
+                    errorMessages.push((result as PromiseRejectedResult).reason.message);
+                }
+            });
+            if (imageItems.length > 0) {
+                imageList.value.push(...imageItems);
+                onImageItems(imageList.value);
+            }
+        } finally {
+            loadingImages.value = false;
         }
-        loadingImages.value = false;
         return errorMessages;
     }
 
     async function addImageFromUrl(url: string) {
-        imageList.value.push(await makeImageItemFromUrl(url));
-        onImageItems(imageList.value);
+        loadingImages.value = true;
+        try {
+            imageList.value.push(await makeImageItemFromUrl(url));
+            onImageItems(imageList.value);
+        } finally {
+            loadingImages.value = false;
+        }
     }
 
     return { imageList, removeImage, addImagesFromFiles, addImageFromUrl, removeAll, loadingImages };

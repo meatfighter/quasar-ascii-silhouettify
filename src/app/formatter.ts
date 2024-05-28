@@ -1,9 +1,59 @@
 import { getHtmlColors } from 'src/app/colors';
 import ColoredGlyphs from 'src/types/coloredGlyphs';
 import { getGlyphInfo } from 'src/types/glyphInfo';
-import { getEOL } from 'src/utils/os';
 
 const { glyphs } = getGlyphInfo();
+
+const EOL = '\n';
+
+export function toNeofetch(coloredGlyphsArray: ColoredGlyphs[]) {
+    let text = '';
+
+    coloredGlyphsArray.forEach(coloredGlyphs => {
+        coloredGlyphs.glyphIndices.forEach(index => {
+            
+        });
+    });
+
+    coloredGlyphsArray.forEach(coloredGlyphs => {
+        coloredGlyphs.glyphIndices.forEach(index => {
+
+        });
+        if (coloredGlyphs.endOfLine) {
+            text += EOL;
+        }
+    });
+
+
+
+    return text;
+}
+
+export function toText(coloredGlyphsArray: ColoredGlyphs[], ansi16: boolean) {
+    let text = '';
+
+    coloredGlyphsArray.forEach(coloredGlyphs => {
+        coloredGlyphs.glyphIndices.forEach(index => {
+            if (ansi16) {
+                if (index < 8) {
+                    text += `\x1b[3${index}m`;
+                } else {
+                    text += `\x1b[1;3${index - 8}m`;
+                }
+            } else {
+                text += `\x1b[38;5;${index}m`;
+            }
+        });
+        if (coloredGlyphs.endOfLine) {
+            text += EOL;
+        }
+    });
+
+    // Append ANSI escape code to reset the text formatting to the terminal's default settings.
+    text += '\x1b[0m';
+
+    return text;
+}
 
 export function toHtml(coloredGlyphsArray: ColoredGlyphs[], title: string, fontSize: number, lineHeight: number) {
     const htmlColors = getHtmlColors();
@@ -40,7 +90,7 @@ export function toHtml(coloredGlyphsArray: ColoredGlyphs[], title: string, fontS
         }
         coloredGlyphs.glyphIndices.forEach(index => html += glyphs[index].htmlEscapedCharacter);
         if (coloredGlyphs.endOfLine) {
-            html += getEOL();
+            html += EOL;
         }
         if (coloredGlyphs.color && (i === coloredGlyphsArray.length - 1
                 || coloredGlyphs.colorIndex !== coloredGlyphsArray[i + 1].colorIndex)) {
