@@ -30,18 +30,12 @@ function onDrop(event: DragEvent) {
     })));
   }
 }
-
-function onDragEnd(event: DragEvent) {
-  event.preventDefault();
-
-  console.log('--1');
-}
 </script>
 
 <template>
   <q-layout view="hHh lpr fFf">
 
-    <div @drop.prevent="onDrop" @dragend="onDragEnd" @dragover.prevent @dragenter.prevent>
+    <div @drop.prevent="onDrop" @dragover.prevent @dragenter.prevent>
       <main-header/>
 
       <q-page-container>
