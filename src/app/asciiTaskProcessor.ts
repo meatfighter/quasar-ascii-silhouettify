@@ -196,14 +196,13 @@ async function toColorAscii(task: AsciiTask, originX: number, originY: number): 
             matched += glyphs[bestGlyphIndex].count;
         }
 
-        // Append end-of-line
-        coloredGlyphsArray.push(
-                new ColoredGlyphs(glyphIndices, lastColorIndex, true, true)); // constructor copies glyphIndices
+        // Append end-of-line (constructor copies glyphIndices)
+        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex, lastColorIndex >= 0, true));
         glyphIndices.length = 0;
     }
 
     if (glyphIndices.length > 0) {
-        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex));
+        coloredGlyphsArray.push(new ColoredGlyphs(glyphIndices, lastColorIndex, lastColorIndex >= 0));
     }
 
     return new Ascii(task.imageStateId, task.id, coloredGlyphsArray, matched);
