@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="justify-end text-body1">
-        <a href="https://github.com/meatfighter/quasar-ascii-silhouettify">Source</a>&nbsp;|&nbsp;<a href="https://meatfighter.com" target="_self">Home</a>
+        <a href="https://github.com/meatfighter/quasar-ascii-silhouettify" target="_blank">Source</a>&nbsp;|&nbsp;<a href="https://meatfighter.com" target="_self">Home</a>
       </div>
     </q-toolbar>
   </q-footer>
