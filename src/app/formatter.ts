@@ -51,11 +51,13 @@ export function toNeofetch(asciis: Ascii[]) {
 export function toText(asciis: Ascii[], ansi16: boolean) {
     let text = '';
 
+    let color = false;
     asciis.forEach(ascii => {
         const coloredGlyphsArray = ascii.coloredGlyphsArray;
         for (let i = 0; i < coloredGlyphsArray.length; ++i) {
             const coloredGlyphs = coloredGlyphsArray[i];
             if (coloredGlyphs.color && (i === 0 || coloredGlyphsArray[i - 1].colorIndex !== coloredGlyphs.colorIndex)) {
+                color = true;
                 if (ansi16) {
                     if (coloredGlyphs.colorIndex < 8) {
                         text += `\x1b[3${coloredGlyphs.colorIndex}m`;
@@ -73,8 +75,10 @@ export function toText(asciis: Ascii[], ansi16: boolean) {
         }
     });
 
-    // Append ANSI escape code to reset the text formatting to the terminal's default settings.
-    text += '\x1b[0m';
+    if (color) {
+        // Append ANSI escape code to reset the text formatting to the terminal's default settings.
+        text += '\x1b[0m';
+    }
 
     return text;
 }
