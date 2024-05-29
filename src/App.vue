@@ -13,7 +13,7 @@ defineOptions({
   font-family: cascadia code;
   font-style: normal;
   font-weight: 400;
-  src: local('Cascadia Code'),url('./fonts/Cascadia.woff') format('woff');
+  src: local('Cascadia Code'),url('src/assets/fonts/Cascadia.woff') format('woff');
 }
 
 a,a:visited {
@@ -26,5 +26,14 @@ a:hover,a:active {
   color: #58A6FF;
   text-decoration: underline;
   white-space: nowrap;
+}
+
+input[type="number"] {
+  appearance: textfield;
+}
+
+input[type="number"]:focus,
+input[type="number"]:hover {
+  appearance: auto;
 }
 </style>

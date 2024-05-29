@@ -90,7 +90,6 @@ const { removeImage } = imageLibraryStore;
 
 .thumbnail:active {
   cursor: grabbing;
-  opacity: 0.5;
 }
 
 .remove-btn {
