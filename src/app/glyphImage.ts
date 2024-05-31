@@ -1,4 +1,4 @@
-import { loadImageData } from 'src/utils/images';
+import { loadRgbas } from 'src/utils/images';
 import { getGlyphInfo, GlyphInfo, setGlyphInfo } from 'src/types/glyphInfo';
 import Glyph from 'src/types/glyph';
 
@@ -66,18 +66,18 @@ class GlyphImage {
 async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
     const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
-    const imageData = await loadImageData(GLYPHS_IMAGE_FILENAME, GLYPHS_IMAGE_FILENAME);
-    const data = imageData.data;
+    const rgbas = await loadRgbas(GLYPHS_IMAGE_FILENAME, GLYPHS_IMAGE_FILENAME);
+    const data = rgbas.data;
 
-    const width = imageData.width / PRINTABLE_ASCII.length;
-    const height = imageData.height;
+    const width = rgbas.width / PRINTABLE_ASCII.length;
+    const height = rgbas.height;
 
     for (let i = PRINTABLE_ASCII.length - 1; i >= 0; --i) {
         const glphyPixels = new Array<boolean[]>(height);
         const I = i * width;
         for (let j = height - 1; j >= 0; --j) {
             const row = glphyPixels[j] = new Array<boolean>(width);
-            const J = I + j * imageData.width;
+            const J = I + j * rgbas.width;
             for (let k = row.length - 1; k >= 0; --k) {
                 row[k] = (data[(J + k) << 2] !== 0);
             }

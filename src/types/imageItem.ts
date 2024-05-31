@@ -1,4 +1,5 @@
-import { loadImageData } from 'src/utils/images';
+import { loadRgbas } from 'src/utils/images';
+import { Rgbas } from 'src/types/rgbas';
 
 const DOWNLOAD_RETRIES = 3;
 const DOWNLOAD_RETRY_DELAY_MILLIS = 500;
@@ -6,7 +7,7 @@ const DOWNLOAD_RETRY_DELAY_MILLIS = 500;
 export class ImageItem {
     constructor(public id: string,
                 public blobUrl: string,
-                public imageData: ImageData,
+                public rgbas: Rgbas,
                 public displayName: string) {
     }
 }
@@ -17,15 +18,15 @@ async function makeImageItem(displayName: string, blobUrl: string): Promise<Imag
     const id = idSequence.toString();
     ++idSequence;
 
-    let imageData;
+    let rgbas;
     try {
-        imageData = await loadImageData(blobUrl, displayName);
+        rgbas = await loadRgbas(blobUrl, displayName);
     } catch (e) {
         URL.revokeObjectURL(blobUrl);
         throw e;
     }
 
-    return new ImageItem(id, blobUrl, imageData, displayName);
+    return new ImageItem(id, blobUrl, rgbas, displayName);
 }
 
 export async function makeImageItemFromFile(file: File): Promise<ImageItem> {

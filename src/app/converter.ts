@@ -16,7 +16,6 @@ import { ImageItem } from 'src/types/imageItem';
 import Ascii from 'src/types/ascii';
 import { partitionArray } from 'src/utils/arrays';
 import { getGlyphInfo } from 'src/types/glyphInfo';
-import { makeImageContent } from 'src/app/imageContentManip';
 import { ImageContent } from 'src/types/imageContent';
 import Message from 'src/types/message';
 import { MessageType } from 'src/types/messageType';
@@ -79,7 +78,7 @@ function getColors(fmt: Format) {
 }
 
 function addImageState(imgStates: Map<string, ImageState>, imageItem: ImageItem) {
-    const imageState = new ImageState(makeImageContent(imageItem.imageData, palette, getColors(format), darkness));
+    const imageState = new ImageState(makeImageContent(imageItem.rgbas, palette, getColors(format), darkness));
     imgStates.set(imageItem.id, imageState);
     toAscii(imageItem.id, imageState);
     updateProcessing();

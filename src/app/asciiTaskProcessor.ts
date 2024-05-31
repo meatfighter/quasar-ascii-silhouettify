@@ -2,10 +2,19 @@ import Ascii from 'src/types/ascii';
 import AsciiTask from 'src/types/asciiTask';
 import ColoredGlyphs from 'src/types/coloredGlyphs';
 import { SPACE } from 'src/types/glyphInfo';
-import { getIndex } from 'src/app/imageContentManip';
 import { yieldToEventThread } from 'src/utils/threads';
+import { ImageContent } from 'src/types/imageContent';
 
 const REGIONS_PER_YIELD = 256;
+
+function getIndex(imageContent: ImageContent, x: number, y: number) {
+    const X = Math.round(x);
+    const Y = Math.round(y);
+    if (X < 0 || Y < 0 || X >= imageContent.width || Y >= imageContent.height) {
+        return 0;
+    }
+    return imageContent.indices[imageContent.width * Y + X];
+}
 
 async function toMonochromeAscii(task: AsciiTask, originX: number, originY: number): Promise<Ascii | null> {
 

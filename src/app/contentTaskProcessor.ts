@@ -1,20 +1,12 @@
-import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong } from 'src/app/colors';
 import { Palette } from 'src/types/palette';
+import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong } from 'src/app/colors';
 import { ImageContent } from 'src/types/imageContent';
+import { Rgbas } from 'src/types/rgbas';
 
-export function getIndex(imageContent: ImageContent, x: number, y: number) {
-    const X = Math.round(x);
-    const Y = Math.round(y);
-    if (X < 0 || Y < 0 || X >= imageContent.width || Y >= imageContent.height) {
-        return 0;
-    }
-    return imageContent.indices[imageContent.width * Y + X];
-}
+function makeImageContent(rgbas: Rgbas, palette: Palette, colors: number, darkness: number) {
 
-export function makeImageContent(imageData: ImageData, palette: Palette, colors: number, darkness: number) {
-
-    const data = imageData.data;
-    const indices = new Uint8Array(imageData.width * imageData.height);
+    const data = rgbas.data;
+    const indices = new Uint8Array(rgbas.width * rgbas.height);
     const frequencies = new Array<number>(256).fill(0);
 
     clearClosestColorCache();
@@ -42,7 +34,7 @@ export function makeImageContent(imageData: ImageData, palette: Palette, colors:
     }
 
     if (indexSet.length <= colors) {
-        return new ImageContent(indices, imageData.width, imageData.height);
+        return new ImageContent(indices, rgbas.width, rgbas.height);
     }
 
     indexSet.length = colors;
@@ -50,7 +42,6 @@ export function makeImageContent(imageData: ImageData, palette: Palette, colors:
     for (let i = 0, j = 0; i < indices.length; ++i) {
         indices[i] = findClosestColorIndexAmong(indexSet, darkness, data[j++], data[j++], data[j++], data[j++]);
     }
-    clearClosestColorCache();
 
-    return new ImageContent(indices, imageData.width, imageData.height);
+    return new ImageContent(indices, rgbas.width, rgbas.height);
 }

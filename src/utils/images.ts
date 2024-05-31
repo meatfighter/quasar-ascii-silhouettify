@@ -1,5 +1,7 @@
-export async function loadImageData(src: string, displayName?: string): Promise<ImageData> {
-    return new Promise<ImageData>((resolve, reject) => {
+import { Rgbas } from 'src/types/rgbas';
+
+export async function loadRgbas(src: string, displayName?: string): Promise<Rgbas> {
+    return new Promise<Rgbas>((resolve, reject) => {
         const img = new Image();
         img.src = src;
         img.onload = () => {
@@ -12,7 +14,12 @@ export async function loadImageData(src: string, displayName?: string): Promise<
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
-            resolve(ctx.getImageData(0, 0, img.width, img.height));
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            resolve({
+                data: imageData.data,
+                width: imageData.width,
+                height: imageData.height,
+            });
         };
         img.onerror = () => {
             reject(new Error(`Error loading image${displayName ? ' ' + displayName : '.'}`));
