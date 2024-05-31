@@ -1,5 +1,5 @@
 import { loadRgbas } from 'src/utils/images';
-import { Rgbas } from 'src/types/rgbas';
+import Rgbas from 'src/types/rgbas';
 
 const DOWNLOAD_RETRIES = 3;
 const DOWNLOAD_RETRY_DELAY_MILLIS = 500;

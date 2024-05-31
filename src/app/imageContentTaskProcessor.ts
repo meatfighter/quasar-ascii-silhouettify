@@ -1,9 +1,11 @@
-import { Palette } from 'src/types/palette';
 import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong } from 'src/app/colors';
 import { ImageContent } from 'src/types/imageContent';
-import { Rgbas } from 'src/types/rgbas';
+import ImageContentTask from 'src/types/imageContentTask';
+import { yieldToEventThread } from 'src/utils/threads';
 
-function makeImageContent(rgbas: Rgbas, palette: Palette, colors: number, darkness: number) {
+function makeImageContent(task: ImageContentTask) {
+
+    const { imageStateId, id, rgbas, palette, colors, darkness } = task;
 
     const data = rgbas.data;
     const indices = new Uint8Array(rgbas.width * rgbas.height);
@@ -34,7 +36,7 @@ function makeImageContent(rgbas: Rgbas, palette: Palette, colors: number, darkne
     }
 
     if (indexSet.length <= colors) {
-        return new ImageContent(indices, rgbas.width, rgbas.height);
+        return new ImageContent(imageStateId, id, indices, rgbas.width, rgbas.height);
     }
 
     indexSet.length = colors;
@@ -43,5 +45,26 @@ function makeImageContent(rgbas: Rgbas, palette: Palette, colors: number, darkne
         indices[i] = findClosestColorIndexAmong(indexSet, darkness, data[j++], data[j++], data[j++], data[j++]);
     }
 
-    return new ImageContent(indices, rgbas.width, rgbas.height);
+    return new ImageContent(imageStateId, id, indices, rgbas.width, rgbas.height);
+}
+
+const tasks = new Map<string, ImageContentTask>();
+
+export async function toImageContent(task: ImageContentTask): Promise<ImageContent | null> {
+    tasks.set(task.id, task);
+
+    await yieldToEventThread();
+    const imageContent = makeImageContent(task);
+    await yieldToEventThread();
+
+    tasks.delete(task.id);
+
+    return task.cancelled ? null : imageContent;
+}
+
+export function cancelImageContentTask(id: string) {
+    const task = tasks.get(id);
+    if (task) {
+        task.cancelled = true;
+    }
 }

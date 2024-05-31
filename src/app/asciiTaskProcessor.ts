@@ -243,7 +243,7 @@ export async function toAscii(task: AsciiTask): Promise<Ascii | null> {
     return task.cancelled ? null : ascii;
 }
 
-export function cancelTask(id: string) {
+export function cancelAsciiTask(id: string) {
     const task = tasks.get(id);
     if (task) {
         task.cancelled = true;

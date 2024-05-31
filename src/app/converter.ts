@@ -20,6 +20,7 @@ import { ImageContent } from 'src/types/imageContent';
 import Message from 'src/types/message';
 import { MessageType } from 'src/types/messageType';
 import { useAsciiStore } from 'stores/asciiStore';
+import ImageContentTask from 'src/types/imageContentTask';
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -32,11 +33,9 @@ let darkness = DEFAULT_DARKNESS;
 let color = !DEFAULT_MONOCHROME;
 
 class ImageState {
+    imageContent: ImageContent | null = null;
     ascii: Ascii | null = null;
     workers = new Map<string, Worker>();
-
-    constructor(public imageContent: ImageContent) {
-    }
 }
 
 const asciiStore = useAsciiStore();
@@ -64,11 +63,17 @@ function updateProcessing() {
 
 function requestAll() {
     clearAsciis();
-    imageStates.forEach((imageState, imageStateId) => {
+    for (const imageState of imageStates.values()) {
         imageState.workers.forEach((worker, id) => worker.postMessage(new Message(MessageType.CANCEL, id)));
         imageState.workers.clear();
+        imageState.imageContent = null;
         imageState.ascii = null;
-        toAscii(imageStateId, imageState);
+    }
+    imageItems.forEach(imageItem => {
+        const imageState = imageStates.get(imageItem.id);
+        if (imageState) {
+            toImageContent(imageItem, imageState);
+        }
     });
     updateProcessing();
 }
@@ -78,10 +83,9 @@ function getColors(fmt: Format) {
 }
 
 function addImageState(imgStates: Map<string, ImageState>, imageItem: ImageItem) {
-    const imageState = new ImageState(makeImageContent(imageItem.rgbas, palette, getColors(format), darkness));
+    const imageState = new ImageState();
     imgStates.set(imageItem.id, imageState);
-    toAscii(imageItem.id, imageState);
-    updateProcessing();
+    toImageContent(imageItem, imageState);
 }
 
 function refreshImageStates() {
@@ -178,8 +182,13 @@ export function onThreads(threads: number) {
             const worker = new AsciiWorker();
             worker.onmessage = <T>(event: MessageEvent<Message<T>>) => {
                 const message = event.data;
-                if (message.type === MessageType.ASCII) {
-                    onAscii(message.data as Ascii);
+                switch (message.type) {
+                    case MessageType.CONTENT:
+                        onImageContent(message.data as ImageContent);
+                        break;
+                    case MessageType.ASCII:
+                        onAscii(message.data as Ascii);
+                        break;
                 }
             };
             workers.push(worker);
@@ -192,13 +201,31 @@ export function onColor(clr: boolean) {
     requestAll();
 }
 
+function toImageContent(imageItem: ImageItem, imageState: ImageState) {
+    const id = idSequence.toString();
+    ++idSequence;
+
+    const worker = workers[workerIndex];
+    workerIndex = (workerIndex + 1) % workers.length;
+
+    imageState.workers.set(id, worker);
+
+    worker.postMessage(new Message(MessageType.MAKE_CONTENT,
+            new ImageContentTask(imageItem.id, id, imageItem.rgbas, palette, getColors(format), darkness)));
+}
+
 function toAscii(imageStateId: string, imageState: ImageState) {
+
+    if (!imageState.imageContent) {
+        return;
+    }
+    const { imageContent } = imageState;
 
     const glyphInfo = getGlyphInfo();
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
     const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
-    const scaledImageWidth = scale * imageState.imageContent.width;
-    const scaledImageHeight = scale * imageState.imageContent.height;
+    const scaledImageWidth = scale * imageContent.width;
+    const scaledImageHeight = scale * imageContent.height;
     const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
     const cols = Math.ceil(scaledImageWidth / scaledGlyphWidth);
     const paddedWidth = Math.ceil(cols * scaledGlyphWidth);
@@ -229,7 +256,7 @@ function toAscii(imageStateId: string, imageState: ImageState) {
         imageState.workers.set(id, worker);
 
         worker.postMessage(new Message(MessageType.CONVERT, new AsciiTask(imageStateId, id, off,
-                imageState.imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX,
+                imageContent, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale, colScale, marginX,
                 marginY, color)));
     });
 }
@@ -252,6 +279,17 @@ function isRunningWorkers() {
         }
     }
     return false;
+}
+
+function onImageContent(imageContent: ImageContent) {
+    const imageState = imageStates.get(imageContent.imageStateId);
+    if (!(imageState && imageState.workers.has(imageContent.id))) {
+        return;
+    }
+    imageState.workers.delete(imageContent.id);
+    imageState.imageContent = imageContent;
+    toAscii(imageContent.imageStateId, imageState);
+    updateProcessing();
 }
 
 function onAscii(ascii: Ascii) {

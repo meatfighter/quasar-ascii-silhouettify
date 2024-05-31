@@ -1,11 +1,19 @@
 import AsciiTask from 'src/types/asciiTask';
-import { cancelTask, toAscii } from 'src/app/asciiTaskProcessor';
+import { cancelAsciiTask, toAscii } from 'src/app/asciiTaskProcessor';
 import { MessageType } from 'src/types/messageType';
 import Message from 'src/types/message';
+import ImageContentTask from 'src/types/imageContentTask';
+import { cancelImageContentTask, toImageContent } from 'src/app/imageContentTaskProcessor';
+import { initColors } from 'src/app/colors';
+
+initColors();
 
 self.onmessage = <T>(event: MessageEvent<Message<T>>) => {
     const message = event.data;
     switch (message.type) {
+        case MessageType.MAKE_CONTENT:
+            onMakeContent(message.data as ImageContentTask);
+            break;
         case MessageType.CONVERT:
             onConvert(message.data as AsciiTask);
             break;
@@ -20,6 +28,20 @@ self.onmessage = <T>(event: MessageEvent<Message<T>>) => {
 
 let runningTasks = 0;
 let terminate = false;
+
+function onMakeContent(task: ImageContentTask) {
+    ++runningTasks;
+    toImageContent(task).then(imageContent => {
+        if (imageContent) {
+            self.postMessage(new Message(MessageType.CONTENT, imageContent));
+        }
+
+        --runningTasks;
+        if (terminate && runningTasks === 0) {
+            self.close();
+        }
+    });
+}
 
 function onConvert(task: AsciiTask) {
     ++runningTasks;
@@ -36,7 +58,8 @@ function onConvert(task: AsciiTask) {
 }
 
 function onCancel(id: string) {
-    cancelTask(id);
+    cancelAsciiTask(id);
+    cancelImageContentTask(id);
 }
 
 function onTerminate() {
