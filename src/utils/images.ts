@@ -15,7 +15,7 @@ export async function loadRgbas(src: string, displayName?: string): Promise<Rgba
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
             const imageData = ctx.getImageData(0, 0, img.width, img.height);
-            resolve(new Rgbas(/*imageData.data*/ new Uint8ClampedArray([ 1, 2, 3, 4 ]), imageData.width, imageData.height));
+            resolve(new Rgbas(imageData.data, imageData.width, imageData.height));
         };
         img.onerror = () => {
             reject(new Error(`Error loading image${displayName ? ' ' + displayName : '.'}`));

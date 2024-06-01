@@ -21,6 +21,7 @@ import Message from 'src/types/message';
 import { MessageType } from 'src/types/messageType';
 import { useAsciiStore } from 'stores/asciiStore';
 import ImageContentTask from 'src/types/imageContentTask';
+import { toRaw } from 'vue';
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -211,7 +212,7 @@ function toImageContent(imageItem: ImageItem, imageState: ImageState) {
     imageState.workers.set(id, worker);
 
     worker.postMessage(new Message(MessageType.MAKE_CONTENT,
-            new ImageContentTask(imageItem.id, id, imageItem.rgbas, palette, getColors(format), darkness)));
+            new ImageContentTask(imageItem.id, id, toRaw(imageItem.rgbas), palette, getColors(format), darkness)));
 }
 
 function toAscii(imageStateId: string, imageState: ImageState) {
