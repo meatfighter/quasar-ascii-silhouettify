@@ -79,7 +79,7 @@ export function findClosestColorIndex(pal: Palette, darkness: number,
     const value = closestColorCache.get(key);
     if (value !== undefined) {
         return value;
-    }
+    } 
 
     let index = 0;
     const c = chroma(r, g, b).lab();
