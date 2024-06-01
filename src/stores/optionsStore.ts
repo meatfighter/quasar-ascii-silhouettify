@@ -48,7 +48,7 @@ export const MIN_SCALE = 0.1;
 export const MAX_SCALE = 10;
 export const SCALE_STEP = MIN_SCALE;
 
-export const DEFAULT_DARKNESS = 10;
+export const DEFAULT_DARKNESS = 5;
 export const MIN_DARKNESS = 0;
 export const MAX_DARKNESS = 100;
 export const DARKNESS_STEP = 5;
