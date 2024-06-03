@@ -15,14 +15,13 @@ import {
 import { ImageItem } from 'src/types/imageItem';
 import Ascii from 'src/types/ascii';
 import { partitionArray } from 'src/utils/arrays';
-import { getGlyphInfo } from 'src/types/glyphInfo';
+import { getGlyphInfo, HTML_WIDTH, TERM_HEIGHT, TERM_WIDTH } from 'src/types/glyphInfo';
 import { ImageContent } from 'src/types/imageContent';
 import Message from 'src/types/message';
 import { MessageType } from 'src/types/messageType';
 import { useAsciiStore } from 'stores/asciiStore';
 import ImageContentTask from 'src/types/imageContentTask';
 import { toRaw } from 'vue';
-import { HTML_HEIGHT, HTML_WIDTH } from 'src/app/glyphImage';
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -222,22 +221,15 @@ function toAscii(imageStateId: string, imageState: ImageState) {
 
     const glyphInfo = getGlyphInfo();
 
-    let scaledGlyphWidth: number;
-    let scaledGlyphHeight: number;
-    let glyphScaleX: number;
-    let glyphScaleY: number;
-    if (format === Format.HTML) {
-        scaledGlyphWidth = HTML_WIDTH * fontSize / 12;
-        scaledGlyphHeight = lineHeight * fontSize * 96 / 72;
-        glyphScaleX = scaledGlyphWidth / (scale * HTML_WIDTH);
-        glyphScaleY = scaledGlyphHeight / (scale * HTML_HEIGHT);
-    } else {
-        scaledGlyphWidth = Math.round(glyphInfo.width * fontSize / 12);
-        scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
-        glyphScaleX = scaledGlyphWidth / (scale * glyphInfo.width);
-        glyphScaleY = scaledGlyphHeight / (scale * glyphInfo.height);
+    let scaledGlyphWidth = HTML_WIDTH * fontSize / 12;
+    let scaledGlyphHeight = lineHeight * fontSize * 96 / 72;
+    if (format !== Format.HTML) {
+        scaledGlyphWidth = Math.round(scaledGlyphWidth);
+        scaledGlyphHeight = Math.round(scaledGlyphHeight);
     }
 
+    const glyphScaleX = scaledGlyphWidth / (scale * TERM_WIDTH);
+    const glyphScaleY = scaledGlyphHeight / (scale * TERM_HEIGHT);
     const scaledImageWidth = scale * imageContent.width;
     const scaledImageHeight = scale * imageContent.height;
     const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
@@ -251,8 +243,8 @@ function toAscii(imageStateId: string, imageState: ImageState) {
 
     // Repeat the image conversion for various origins within a glyph-sized region and return the best one found.
     const offsets: Offset[] = [];
-    for (let y = -glyphInfo.height; y <= 0; ++y) {
-        for (let x = -glyphInfo.width; x <= 0; ++x) {
+    for (let y = -TERM_HEIGHT; y <= 0; ++y) {
+        for (let x = -TERM_WIDTH; x <= 0; ++x) {
             offsets.push(new Offset(x, y));
         }
     }

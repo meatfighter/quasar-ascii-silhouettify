@@ -1,14 +1,11 @@
 import { loadRgbas } from 'src/utils/images';
-import { getGlyphInfo, GlyphInfo, setGlyphInfo } from 'src/types/glyphInfo';
+import { getGlyphInfo, GlyphInfo, setGlyphInfo, TERM_HEIGHT, TERM_WIDTH } from 'src/types/glyphInfo';
 import Glyph from 'src/types/glyph';
 
 const GLYPHS_IMAGE_FILENAME = 'src/assets/images/glyphs.png';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
-
-export const HTML_WIDTH = 9.363636363636363;
-export const HTML_HEIGHT = 19.2;
 
 class GlyphImage {
     htmlEscapedCharacter: string;
@@ -72,14 +69,11 @@ async function loadGlyphs(): Promise<GlyphInfo> {
     const rgbas = await loadRgbas(GLYPHS_IMAGE_FILENAME, GLYPHS_IMAGE_FILENAME);
     const data = rgbas.data;
 
-    const width = rgbas.width / PRINTABLE_ASCII.length;
-    const height = rgbas.height;
-
     for (let i = PRINTABLE_ASCII.length - 1; i >= 0; --i) {
-        const glphyPixels = new Array<boolean[]>(height);
-        const I = i * width;
-        for (let j = height - 1; j >= 0; --j) {
-            const row = glphyPixels[j] = new Array<boolean>(width);
+        const glphyPixels = new Array<boolean[]>(TERM_HEIGHT);
+        const I = i * TERM_WIDTH;
+        for (let j = TERM_HEIGHT - 1; j >= 0; --j) {
+            const row = glphyPixels[j] = new Array<boolean>(TERM_WIDTH);
             const J = I + j * rgbas.width;
             for (let k = row.length - 1; k >= 0; --k) {
                 row[k] = (data[(J + k) << 2] !== 0);
@@ -90,7 +84,7 @@ async function loadGlyphs(): Promise<GlyphInfo> {
 
     glyphsImages.sort((a, b) => a.count - b.count);
 
-    masks.length = width * height;
+    masks.length = TERM_WIDTH * TERM_HEIGHT;
     for (let i = masks.length - 1; i >= 0; --i) {
         masks[i] = [ 0, 0, 0 ];
     }
@@ -98,9 +92,9 @@ async function loadGlyphs(): Promise<GlyphInfo> {
         const pixels = glyphsImages[i].pixels;
         const index = i >> 5;
         const mask = 1 << (i & 31);
-        for (let j = height - 1; j >= 0; --j) {
+        for (let j = TERM_HEIGHT - 1; j >= 0; --j) {
             const row = pixels[j];
-            const tableOffset = width * j;
+            const tableOffset = TERM_WIDTH * j;
             for (let k = row.length - 1; k >= 0; --k) {
                 if (!row[k]) {
                     masks[tableOffset + k][index] |= mask;
@@ -116,7 +110,7 @@ async function loadGlyphs(): Promise<GlyphInfo> {
                 glyphImage.neofetchEscapedCharacter, glyphImage.count);
     }
 
-    return new GlyphInfo(masks, glyphs, width, height, glyphs[1].count);
+    return new GlyphInfo(masks, glyphs, glyphs[1].count);
 }
 
 export async function initGlyphInfo() {
