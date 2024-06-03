@@ -15,10 +15,10 @@ import {
 import { Format } from 'src/types/format';
 import { Palette } from 'src/types/palette';
 
-export const TEXT_FORMAT = 'text';
 export const HTML_FORMAT = 'HTML';
+export const TEXT_FORMAT = 'text';
 export const NEOFETCH_FORMAT = 'Neofetch';
-export const FORMAT_OPTIONS = [ TEXT_FORMAT, HTML_FORMAT, NEOFETCH_FORMAT ];
+export const FORMAT_OPTIONS = [ HTML_FORMAT, TEXT_FORMAT, NEOFETCH_FORMAT ];
 export const DEFAULT_FORMAT = FORMAT_OPTIONS[0];
 
 export const PALETTE_8 = '8';

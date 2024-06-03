@@ -7,6 +7,9 @@ const GLYPHS_IMAGE_FILENAME = 'src/assets/images/glyphs.png';
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
+export const HTML_WIDTH = 9.363636363636363;
+export const HTML_HEIGHT = 19.2;
+
 class GlyphImage {
     htmlEscapedCharacter: string;
     neofetchEscapedCharacter: string;

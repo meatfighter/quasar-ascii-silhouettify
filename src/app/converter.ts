@@ -22,6 +22,7 @@ import { MessageType } from 'src/types/messageType';
 import { useAsciiStore } from 'stores/asciiStore';
 import ImageContentTask from 'src/types/imageContentTask';
 import { toRaw } from 'vue';
+import { HTML_HEIGHT, HTML_WIDTH } from 'src/app/glyphImage';
 
 let imageItems: ImageItem[] = [];
 let format = DEFAULT_FORMAT;
@@ -135,11 +136,8 @@ export function onImageItems(imgItems: ImageItem[]) {
 }
 
 export function onFormat(fmt: Format) {
-    const refresh = getColors(fmt) !== getColors(format);
     format = fmt;
-    if (refresh) {
-        refreshImageStates();
-    }
+    refreshImageStates();
 }
 
 export function onPalette(pal: Palette) {
@@ -223,8 +221,23 @@ function toAscii(imageStateId: string, imageState: ImageState) {
     const { imageContent } = imageState;
 
     const glyphInfo = getGlyphInfo();
-    const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
-    const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
+
+    let scaledGlyphWidth: number;
+    let scaledGlyphHeight: number;
+    let glyphScaleX: number;
+    let glyphScaleY: number;
+    if (format === Format.HTML) {
+        scaledGlyphWidth = HTML_WIDTH * fontSize / 12;
+        scaledGlyphHeight = lineHeight * fontSize * 96 / 72;
+        glyphScaleX = scaledGlyphWidth / (scale * HTML_WIDTH);
+        glyphScaleY = scaledGlyphHeight / (scale * HTML_HEIGHT);
+    } else {
+        scaledGlyphWidth = Math.round(glyphInfo.width * fontSize / 12);
+        scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
+        glyphScaleX = scaledGlyphWidth / (scale * glyphInfo.width);
+        glyphScaleY = scaledGlyphHeight / (scale * glyphInfo.height);
+    }
+
     const scaledImageWidth = scale * imageContent.width;
     const scaledImageHeight = scale * imageContent.height;
     const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
@@ -233,8 +246,6 @@ function toAscii(imageStateId: string, imageState: ImageState) {
     const paddedHeight = Math.ceil(rows * scaledGlyphHeight);
     const marginX = (scaledImageWidth - paddedWidth) / 2;
     const marginY = (scaledImageHeight - paddedHeight) / 2;
-    const glyphScaleX = scaledGlyphWidth / (scale * glyphInfo.width);
-    const glyphScaleY = scaledGlyphHeight / (scale * glyphInfo.height);
     const rowScale = scaledGlyphHeight / scale;
     const colScale = scaledGlyphWidth / scale;
 

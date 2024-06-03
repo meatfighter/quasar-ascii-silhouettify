@@ -1,7 +1,7 @@
 export enum Format {
-    TEXT,
     HTML,
+    TEXT,
     NEOFETCH,
 }
 
-export const DEFAULT_FORMAT = Format.TEXT;
+export const DEFAULT_FORMAT = Format.HTML;
