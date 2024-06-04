@@ -67,8 +67,6 @@ async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
     const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
     const rgbas = await loadRgbas(GLYPHS_IMAGE_FILENAME, GLYPHS_IMAGE_FILENAME);
-    const data = rgbas.data;
-
     for (let i = PRINTABLE_ASCII.length - 1; i >= 0; --i) {
         const glphyPixels = new Array<boolean[]>(TERM_HEIGHT);
         const I = i * TERM_WIDTH;
@@ -76,7 +74,7 @@ async function loadGlyphs(): Promise<GlyphInfo> {
             const row = glphyPixels[j] = new Array<boolean>(TERM_WIDTH);
             const J = I + j * rgbas.width;
             for (let k = row.length - 1; k >= 0; --k) {
-                row[k] = (data[(J + k) << 2] !== 0);
+                row[k] = (rgbas.data[(J + k) << 2] !== 0);
             }
         }
         glyphsImages[i] = new GlyphImage(PRINTABLE_ASCII[i], glphyPixels);

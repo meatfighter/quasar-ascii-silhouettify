@@ -192,6 +192,7 @@ export function onThreads(threads: number) {
             workers.push(worker);
         }
     }
+    workerIndex %= workers.length;
 }
 
 export function onColor(clr: boolean) {
