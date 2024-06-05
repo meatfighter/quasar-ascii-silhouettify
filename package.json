@@ -2,7 +2,7 @@
   "name": "quasar-ascii-silhouettify",
   "version": "1.0.0",
   "description": "Online ASCII silhouette generator.",
-  "productName": "quasar-ascii-silhouettify",
+  "productName": "ASCII Silhouettify",
   "author": "meatfighter <o__1@hotmail.com>",
   "private": true,
   "scripts": {

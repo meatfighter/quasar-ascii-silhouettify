@@ -1,8 +1,7 @@
 import { loadRgbas } from 'src/utils/images';
 import { getGlyphInfo, GlyphInfo, setGlyphInfo, TERM_HEIGHT, TERM_WIDTH } from 'src/types/glyphInfo';
 import Glyph from 'src/types/glyph';
-
-const GLYPHS_IMAGE_FILENAME = 'src/assets/images/glyphs.png';
+import glyphImagePath from 'src/assets/images/glyphs.png';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
@@ -66,7 +65,7 @@ class GlyphImage {
 async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
     const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
-    const rgbas = await loadRgbas(GLYPHS_IMAGE_FILENAME, GLYPHS_IMAGE_FILENAME);
+    const rgbas = await loadRgbas(glyphImagePath);
     for (let i = PRINTABLE_ASCII.length - 1; i >= 0; --i) {
         const glphyPixels = new Array<boolean[]>(TERM_HEIGHT);
         const I = i * TERM_WIDTH;
