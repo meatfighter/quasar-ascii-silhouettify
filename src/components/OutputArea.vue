@@ -56,6 +56,7 @@ function getStyle(coloredGlyphs: ColoredGlyphs) {
   height: 100%;
   background: #0C0C0C;
   overflow: hidden;
+  padding: 19px 0;
 }
 
 p {
@@ -63,5 +64,6 @@ p {
   color: #CCCCCC;
   white-space: pre;
   text-align: center;
+  margin: 10px 0;
 }
 </style>
