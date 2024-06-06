@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Online ASCII silhouette generator.",
   "productName": "ASCII Silhouettify",
-  "author": "meatfighter <o__1@hotmail.com>",
+  "author": "meatfighter.com",
   "private": true,
   "scripts": {
     "clean": "rimraf ./dist ./bin",
