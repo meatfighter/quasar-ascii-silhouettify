@@ -22,7 +22,7 @@ async function makeImageItem(displayName: string, blobUrl: string): Promise<Imag
     try {
         rgbas = await loadRgbas(blobUrl, displayName);
     } catch (e) {
-        URL.revokeObjectURL(blobUrl);
+        URL.revokeObjectURL(blobUrl); // TODO THIS SHOULD BE REVOKED IN FINALLY AND THE DIALOG MIGHT CLOSE IF YOU CLICK OUTSIDE OF IT
         throw e;
     }
 
