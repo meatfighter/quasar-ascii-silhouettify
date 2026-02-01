@@ -1,4 +1,5 @@
-import chroma, { Color, deltaE, lab } from 'chroma-js';
+import chroma from 'chroma-js';
+import type { Color } from 'chroma-js';
 import { Palette } from 'src/types/palette';
 
 const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAAAAAABfAACHAACvAADXAAD/AF8AAF9fAF+HAF+' +
@@ -56,11 +57,11 @@ export function findClosestColorIndexAmong(indices: number[], darkness: number,
     const c = chroma(r, g, b).lab();
     c[0] *= a / 255;
     if (c[0] >= darkness) {
-        const q = lab(c[0], c[1], c[2]);
+        const q = chroma.lab(c[0], c[1], c[2]);
         let error = Number.MAX_VALUE;
         for (let i = indices.length - 1; i >= 0; --i) {
             const p = palette[indices[i]];
-            const e = deltaE(p, q);
+            const e = chroma.deltaE(p, q);
             if (e < error) {
                 error = e;
                 index = indices[i];
@@ -85,7 +86,7 @@ export function findClosestColorIndex(pal: Palette, darkness: number,
     const c = chroma(r, g, b).lab();
     c[0] *= a / 255;
     if (c[0] >= darkness) {
-        const q = lab(c[0], c[1], c[2]);
+        const q = chroma.lab(c[0], c[1], c[2]);
         let error = Number.MAX_VALUE;
 
         let i: number;
@@ -111,7 +112,7 @@ export function findClosestColorIndex(pal: Palette, darkness: number,
 
         for (; i >= minIndex; --i) {
             const p = palette[i];
-            const e = deltaE(p, q);
+            const e = chroma.deltaE(p, q);
             if (e < error) {
                 error = e;
                 index = i;

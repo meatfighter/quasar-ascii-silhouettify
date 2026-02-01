@@ -6,7 +6,7 @@
   <q-footer class="text-white" style="background: #1F1F1F;">
     <q-toolbar>
       <div class="col justify-start text-caption">
-        <div>&copy; 2024 meatfighter.com</div>
+        <div>&copy; 2026 meatfighter.com</div>
         <div>
           This content is licensed under
           <a href="https://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;">
