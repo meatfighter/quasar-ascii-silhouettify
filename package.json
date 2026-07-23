@@ -1,6 +1,6 @@
 {
   "name": "quasar-ascii-silhouettify",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Online ASCII silhouette generator.",
   "productName": "ASCII Silhouettify",
   "author": "meatfighter.com",
@@ -15,45 +15,48 @@
     "run": "http-server ./dist/spa"
   },
   "dependencies": {
-    "@quasar/extras": "^1.16.4",
-    "chroma-js": "^2.4.2",
-    "pinia": "^2.1.7",
-    "quasar": "^2.16.4",
-    "vue": "^3.4.18",
-    "vue-router": "^4.0.12",
+    "@quasar/extras": "^1.18.0",
+    "chroma-js": "^2.6.0",
+    "pinia": "^2.3.1",
+    "quasar": "^2.22.0",
+    "vue": "^3.5.40",
+    "vue-router": "^4.6.4",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^2.4.0",
-    "@types/chroma-js": "^2.4.4",
-    "@types/node": "^20.0.0",
-    "@types/sortablejs": "^1.15.8",
-    "@typescript-eslint/eslint-plugin": "^8.54.0",
-    "@typescript-eslint/parser": "^8.54.0",
-    "autoprefixer": "^10.4.2",
+    "@quasar/app-vite": "^2.6.2",
+    "@types/chroma-js": "^2.4.5",
+    "@types/node": "^20.19.43",
+    "@types/sortablejs": "^1.15.9",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "autoprefixer": "^10.5.4",
     "cross-env": "^7.0.3",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^8.1.0",
-    "eslint-plugin-vue": "^10.7.0",
-    "prettier": "^2.5.1",
-    "typescript": "^5.0.0",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^8.10.2",
+    "eslint-plugin-vue": "^10.10.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.9.3",
     "vite-plugin-checker": "^0.10.3",
-    "vue-tsc": "^3.2.4"
+    "vue-tsc": "^3.3.8"
   },
   "engines": {
     "node": "^24 || ^22.12 || ^20.19",
     "npm": ">= 10"
   },
   "overrides": {
-    "qs": "6.14.1",
-    "lodash": "4.17.23",
-    "js-yaml": "4.1.1",
+    "qs": "6.15.3",
+    "lodash": "4.18.1",
+    "js-yaml": "4.3.0",
     "nanoid": "5.0.9",
     "tmp": "0.2.4",
     "on-headers": "1.1.0",
     "cookie": "0.7.0",
-    "body-parser": "1.20.3",
+    "body-parser": "1.20.6",
     "send": "0.19.0",
-    "serve-static": "1.16.0"
+    "serve-static": "1.16.0",
+    "path-to-regexp": "0.1.13",
+    "flatted": "3.4.3",
+    "esbuild": "0.28.1"
   }
 }
